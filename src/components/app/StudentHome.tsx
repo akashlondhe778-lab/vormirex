@@ -253,7 +253,7 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
                   <p className="text-xs font-bold text-white line-clamp-2 leading-tight drop-shadow-sm">
                     {video.title}
                   </p>
-                  <p className="text-[10px] text-[#bacac6]">{video.creatorName}</p>
+                  <p className="text-[10px] text-[#bacac6]">{video.teacherName}</p>
                 </div>
               </div>
             </div>

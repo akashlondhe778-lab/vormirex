@@ -1,6 +1,7 @@
 import React from 'react';
-import { Course } from '../../types';
+import { Course, PricingPlan } from '../../types';
 import { FeaturesSection } from '../FeaturesSection';
+import { PricingSection } from '../PricingSection';
 import { StatsSection } from '../StatsSection';
 import { TestimonialsSection } from '../TestimonialsSection';
 import { ForTeachersSection } from './ForTeachersSection';
@@ -17,6 +18,7 @@ interface PublicLandingPageProps {
   onExploreVormirix: () => void;
   onOpenTeacherSignup: () => void;
   onOpenAuthForCourse: (course: Course) => void;
+  onSelectPricingPlan: (plan: PricingPlan, billingCycle: 'monthly' | 'yearly') => void;
 }
 
 export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
@@ -25,6 +27,7 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
   onExploreVormirix,
   onOpenTeacherSignup,
   onOpenAuthForCourse,
+  onSelectPricingPlan,
 }) => {
   return (
     <div className="w-full">
@@ -41,6 +44,11 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
       {/* 3. Why Vormirix Section */}
       <WhyVormirix />
 
+      {/* 3b. Core Features (id="features" — linked from the Footer's
+          Product > Features link, which previously pointed at nothing
+          since this section existed but was never rendered) */}
+      <FeaturesSection onOpenStudioTab={onStartLearning} />
+
       {/* 4. How It Works (Scroll -> Learn -> Grow) */}
       <HowItWorks onStartLearning={onStartLearning} />
 
@@ -52,6 +60,10 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
         courses={courses}
         onOpenAuthForCourse={onOpenAuthForCourse}
       />
+
+      {/* 6b. Pricing Plans (id="pricing" — same situation as Features
+          above: existed, had a Footer link, was never rendered) */}
+      <PricingSection onSelectPlan={onSelectPricingPlan} />
 
       {/* 7. For Teachers Section */}
       <ForTeachersSection onStartTeaching={onOpenTeacherSignup} />

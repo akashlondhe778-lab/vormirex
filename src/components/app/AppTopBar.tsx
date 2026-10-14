@@ -1,5 +1,6 @@
 import {
   Award,
+  BarChart3,
   BookOpen,
   ChevronDown,
   Film,
@@ -7,7 +8,6 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  RotateCcw,
   Search,
   Sparkles,
   User,
@@ -22,7 +22,6 @@ interface AppTopBarProps {
   activeRoute: string;
   onNavigate: (route: string) => void;
   onOpenStudio: () => void;
-  onSwitchRole: () => void;
   onLogout: () => void;
   onSearchQuery?: (q: string) => void;
 }
@@ -32,7 +31,6 @@ export const AppTopBar: React.FC<AppTopBarProps> = ({
   activeRoute,
   onNavigate,
   onOpenStudio,
-  onSwitchRole,
   onLogout,
   onSearchQuery,
 }) => {
@@ -137,36 +135,57 @@ export const AppTopBar: React.FC<AppTopBarProps> = ({
               <div className="px-3 py-2 border-b border-[#272a30]">
                 <p className="text-xs font-bold text-white truncate">{user.name}</p>
                 <p className="text-[10px] text-[#58f5e0] capitalize">
-                  {user.role} • Level {user.level}
+                  {isTeacher ? 'Teacher' : `Student • Level ${user.level}`}
                 </p>
               </div>
 
+              {/* Student and Teacher are separate account types (see
+                  VORMIRIX_BACKEND_PLAN.md §13) — this menu shows only the
+                  options for the signed-in account's own role, with no way
+                  to switch to the other role from inside the app. */}
               <div className="py-1 space-y-1">
-                <button
-                  onClick={() => onNavigate('/app/profile')}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-[#e1e2ea] hover:bg-[#272a30] transition-colors"
-                >
-                  <User className="w-3.5 h-3.5 text-[#bacac6]" />
-                  <span>My Profile & Stats</span>
-                </button>
-
-                {!isTeacher && (
-                  <button
-                    onClick={() => onNavigate('/app/learning')}
-                    className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-[#e1e2ea] hover:bg-[#272a30] transition-colors"
-                  >
-                    <BookOpen className="w-3.5 h-3.5 text-[#bacac6]" />
-                    <span>My Learning</span>
-                  </button>
+                {isTeacher ? (
+                  <>
+                    <button
+                      onClick={() => onNavigate('/app/profile')}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-[#e1e2ea] hover:bg-[#272a30] transition-colors"
+                    >
+                      <User className="w-3.5 h-3.5 text-[#bacac6]" />
+                      <span>Teacher Profile</span>
+                    </button>
+                    <button
+                      onClick={() => onNavigate('/app/teacher/courses')}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-[#e1e2ea] hover:bg-[#272a30] transition-colors"
+                    >
+                      <BookOpen className="w-3.5 h-3.5 text-[#bacac6]" />
+                      <span>My Courses</span>
+                    </button>
+                    <button
+                      onClick={() => onNavigate('/app/teacher/analytics')}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-[#e1e2ea] hover:bg-[#272a30] transition-colors"
+                    >
+                      <BarChart3 className="w-3.5 h-3.5 text-[#bacac6]" />
+                      <span>Analytics</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => onNavigate('/app/profile')}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-[#e1e2ea] hover:bg-[#272a30] transition-colors"
+                    >
+                      <User className="w-3.5 h-3.5 text-[#bacac6]" />
+                      <span>My Profile & Stats</span>
+                    </button>
+                    <button
+                      onClick={() => onNavigate('/app/learning')}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-[#e1e2ea] hover:bg-[#272a30] transition-colors"
+                    >
+                      <BookOpen className="w-3.5 h-3.5 text-[#bacac6]" />
+                      <span>My Learning</span>
+                    </button>
+                  </>
                 )}
-
-                <button
-                  onClick={onSwitchRole}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-[#ccbdff] hover:bg-[#272a30] transition-colors"
-                >
-                  <RotateCcw className="w-3.5 h-3.5 text-[#ccbdff]" />
-                  <span>Switch to {isTeacher ? 'Student View' : 'Teacher View'}</span>
-                </button>
               </div>
 
               <div className="pt-1 border-t border-[#272a30]">
@@ -210,6 +229,15 @@ export const AppTopBar: React.FC<AppTopBarProps> = ({
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
+                    onNavigate('/app/community');
+                  }}
+                  className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold text-white hover:bg-[#1f232b]"
+                >
+                  👥 Community
+                </button>
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
                     onNavigate('/app/courses');
                   }}
                   className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold text-white hover:bg-[#1f232b]"
@@ -247,15 +275,6 @@ export const AppTopBar: React.FC<AppTopBarProps> = ({
             )}
           </div>
           <div className="pt-3 border-t border-[#272a30] flex flex-col gap-2">
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onSwitchRole();
-              }}
-              className="w-full py-2.5 rounded-xl bg-[#191c21] border border-[#3b4a47] text-xs font-bold text-[#ccbdff]"
-            >
-              Switch Persona ({isTeacher ? 'Teacher' : 'Student'})
-            </button>
             <button
               onClick={() => {
                 setMobileMenuOpen(false);

@@ -4,20 +4,16 @@ import {
   BookOpen,
   DollarSign,
   Film,
-  Flame,
-  GraduationCap,
   Home,
   LayoutDashboard,
   LogOut,
   PlayCircle,
   PlusCircle,
-  RotateCcw,
   Sparkles,
   Upload,
   User,
-  UserCheck,
+  Users,
   Video,
-  Zap,
 } from 'lucide-react';
 import React from 'react';
 import { UserProfile } from '../../types';
@@ -27,7 +23,6 @@ interface AppSidebarProps {
   user: UserProfile;
   activeRoute: string;
   onNavigate: (route: string) => void;
-  onSwitchRole: () => void;
   onLogout: () => void;
   onOpenCreateCourse: () => void;
   onOpenUploadVideo: () => void;
@@ -38,7 +33,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   user,
   activeRoute,
   onNavigate,
-  onSwitchRole,
   onLogout,
   onOpenCreateCourse,
   onOpenUploadVideo,
@@ -56,6 +50,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   const studentNavItems: NavItem[] = [
     { id: '/app', label: 'Home', icon: Home },
     { id: '/app/feed', label: 'Reels Feed', icon: Film, badge: '🔥 Shorts' },
+    { id: '/app/community', label: 'Community', icon: Users, badge: '✨ New' },
     { id: '/app/courses', label: 'Courses', icon: BookOpen },
     { id: '/app/learning', label: 'My Learning', icon: PlayCircle },
     { id: '/app/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -193,16 +188,6 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             </p>
           </div>
         </div>
-
-        {/* Role toggle button */}
-        <button
-          onClick={onSwitchRole}
-          className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl bg-[#191c21] hover:bg-[#272a30] border border-[#3b4a47] text-[11px] font-bold text-[#ccbdff] transition-all cursor-pointer"
-          title="Switch persona between Student and Teacher"
-        >
-          <RotateCcw className="w-3 h-3" />
-          <span>Switch to {isTeacher ? 'Student View' : 'Teacher Studio'}</span>
-        </button>
 
         {/* Sign out */}
         <button

@@ -74,7 +74,7 @@ export const PublicCoursesPreview: React.FC<PublicCoursesPreviewProps> = ({
             <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
               <div>
                 <div className="flex items-center justify-between text-xs text-[#bacac6] mb-2">
-                  <span className="font-semibold text-[#58f5e0]">{course.level}</span>
+                  <span className="font-semibold text-[#58f5e0]">{course.difficulty}</span>
                   <div className="flex items-center gap-1 text-[#f59e0b]">
                     <Star className="w-3.5 h-3.5 fill-current" />
                     <span className="font-bold">{course.rating}</span>
@@ -99,7 +99,7 @@ export const PublicCoursesPreview: React.FC<PublicCoursesPreviewProps> = ({
                   />
                   <div>
                     <p className="text-xs font-bold text-white">{course.teacherName}</p>
-                    <p className="text-[10px] text-[#bacac6]">{course.durationHours}h • {course.lessons.length} lessons</p>
+                    <p className="text-[10px] text-[#bacac6]">{course.estimatedDuration}</p>
                   </div>
                 </div>
               </div>

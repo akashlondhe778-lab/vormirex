@@ -68,7 +68,7 @@ export const PublicCourseModal: React.FC<PublicCourseModalProps> = ({
               />
               <div>
                 <h4 className="text-xs font-bold text-white">{course.teacherName}</h4>
-                <p className="text-[11px] text-[#bacac6]">{course.teacherTitle}</p>
+                <p className="text-[11px] text-[#bacac6]">{course.teacherRole}</p>
               </div>
             </div>
 
@@ -83,7 +83,7 @@ export const PublicCourseModal: React.FC<PublicCourseModalProps> = ({
               </div>
               <div className="flex items-center gap-1">
                 <Clock className="w-4 h-4 text-[#ccbdff]" />
-                <span>{course.durationHours} hrs</span>
+                <span>{course.estimatedDuration}</span>
               </div>
             </div>
           </div>
@@ -121,7 +121,7 @@ export const PublicCourseModal: React.FC<PublicCourseModalProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-[#bacac6]">{lesson.durationMinutes}m</span>
+                    <span className="text-[11px] text-[#bacac6]">{lesson.duration}</span>
                     {lesson.isFreePreview ? (
                       <span className="text-[10px] font-bold text-[#2dd8c4] bg-[#2dd8c4]/15 px-2 py-0.5 rounded">
                         Free Preview

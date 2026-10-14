@@ -1,6 +1,6 @@
 import confetti from 'canvas-confetti';
-import { Award, Bot, CheckCircle, Sparkles, Zap } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { AchievementsView } from './components/app/AchievementsView';
 import { AppSidebar } from './components/app/AppSidebar';
 import { AppTopBar } from './components/app/AppTopBar';
@@ -8,6 +8,9 @@ import { MyLearning } from './components/app/MyLearning';
 import { StudentHome } from './components/app/StudentHome';
 import { AuthModal } from './components/AuthModal';
 import { AuthPage } from './components/auth/AuthPage';
+import { CommunityPage } from './components/community/CommunityPage';
+import { QuestionDetailPage } from './components/community/QuestionDetailPage';
+import { StudentProfilePage } from './components/community/StudentProfilePage';
 import { CourseDetailPage } from './components/CourseDetailPage';
 import { CoursePlayer } from './components/CoursePlayer';
 import { CoursesCatalog } from './components/CoursesCatalog';
@@ -24,13 +27,26 @@ import { StudioModal } from './components/StudioModal';
 import { TeacherDashboard } from './components/TeacherDashboard';
 import { UpgradeModal } from './components/UpgradeModal';
 import { UploadVideoModal } from './components/UploadVideoModal';
-import { INITIAL_COURSES, INITIAL_SHORT_VIDEOS } from './data/edtechData';
-import { INITIAL_USER, TEACHER_USER } from './data/mockData';
-import { Course, PricingPlan, ShortVideo, UserProfile } from './types';
+import { useAchievements } from './hooks/useAchievements';
+import { useAuth } from './hooks/useAuth';
+import { useCourses, useTeacherCourses } from './hooks/useCourses';
+import { useFeed } from './hooks/useFeed';
+import { useWeeklyXp } from './hooks/useXP';
+import { achievementService } from './services/achievementService';
+import { courseService } from './services/courseService';
+import { enrollmentService } from './services/enrollmentService';
+import { profileService } from './services/profileService';
+import { socialProfileService } from './services/socialProfileService';
+import { progressService } from './services/progressService';
+import { videoService } from './services/videoService';
+import { xpService } from './services/xpService';
+import { Course, PricingPlan, Question, ShortVideo, UserProfile } from './types';
 
 export default function App() {
-  // Authentication State: null for unauthenticated visitors by default
-  const [user, setUser] = useState<UserProfile | null>(null);
+  // Authentication State: backed by real Supabase Auth (src/hooks/useAuth.ts).
+  // null for unauthenticated visitors by default; session is restored from
+  // Supabase on refresh instead of always logging out.
+  const { user, loading: authLoading, signIn, signUp, signOut, refreshProfile } = useAuth();
 
   // Routing State
   const [currentRoute, setCurrentRoute] = useState<string>(() => {
@@ -41,14 +57,32 @@ export default function App() {
   // Role input preset for signup
   const [authRolePreset, setAuthRolePreset] = useState<'student' | 'teacher'>('student');
 
-  // Courses & Videos state
-  const [courses, setCourses] = useState<Course[]>(INITIAL_COURSES);
-  const [videos, setVideos] = useState<ShortVideo[]>(INITIAL_SHORT_VIDEOS);
+  // Courses & Videos: loaded from Supabase (src/hooks/useCourses.ts,
+  // src/hooks/useFeed.ts) instead of the static INITIAL_COURSES /
+  // INITIAL_SHORT_VIDEOS mock arrays.
+  const { courses, setCourses, reload: reloadCourses } = useCourses();
+  const { videos, setVideos, reload: reloadFeed } = useFeed(user?.id);
+  // Teacher's own courses regardless of draft/published/archived status —
+  // the public `courses` list above only ever contains status='published'
+  // rows (see courseService.listPublished), which would otherwise hide a
+  // teacher's unpublished drafts from their own dashboard.
+  const {
+    courses: teacherCourses,
+    setCourses: setTeacherCourses,
+    reload: reloadTeacherCourses,
+  } = useTeacherCourses(user?.role === 'teacher' ? user.id : undefined);
+  const { series: weeklyXp } = useWeeklyXp(user?.id);
+  const { achievements } = useAchievements(user?.id);
 
   // Selected entities for deep view
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [playerLessonIndex, setPlayerLessonIndex] = useState<number>(0);
   const [checkoutCourse, setCheckoutCourse] = useState<Course | null>(null);
+  // Community / Social: selected question (Ask & Solve detail) and whose
+  // public community profile is being viewed — defaults to the viewer's own
+  // id when navigating to /app/community/profile with nothing selected.
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [communityProfileId, setCommunityProfileId] = useState<string | null>(null);
 
   // Modals state
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -88,49 +122,106 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Route protection guard
+  // NOTE — no "are you logged in at all" guard here on purpose: per current
+  // product direction, development access must never be blocked by an auth
+  // gate. `useAuth` (src/hooks/useAuth.ts) silently signs into a seeded demo
+  // account in dev mode when there's no real session, so `user` is
+  // effectively always populated while developing. Re-add a redirect-to-
+  // /login guard here when production authentication is turned on (see
+  // VORMIRIX_BACKEND_PLAN.md).
+  //
+  // The guard below is a DIFFERENT concern: once someone IS authenticated,
+  // Student and Teacher are separate account types (see
+  // VORMIRIX_BACKEND_PLAN.md §13) and must not be able to wander into each
+  // other's area via a typed-in URL. `/app/profile` is the one explicitly
+  // shared page (both role menus link to it). This is a client-side UX
+  // convenience only — the real enforcement is server-side: Supabase RLS
+  // checks `profiles.role` on every write (see
+  // supabase/migrations/013_role_security.sql), so even if someone bypassed
+  // this redirect entirely they still couldn't read/write the other role's
+  // data.
+  const isTeacherRoute = (route: string) => route.startsWith('/app/teacher');
+  const STUDENT_ONLY_ROUTES = [
+    '/app',
+    '/app/home',
+    '/app/feed',
+    '/app/courses',
+    '/app/courses/detail',
+    '/app/learn',
+    '/app/learning',
+    '/app/dashboard',
+    '/app/achievements',
+    '/app/community',
+    '/app/community/question',
+    '/app/community/profile',
+  ];
+
   useEffect(() => {
-    if (currentRoute.startsWith('/app') && !user) {
-      showToast('🔒 Please sign in to access the Vormirix learning area.');
-      navigateTo('/login');
+    if (authLoading || !user) return;
+
+    if (isTeacherRoute(currentRoute) && user.role !== 'teacher') {
+      showToast('🔒 Teacher access only — redirected to your Student dashboard.');
+      navigateTo('/app');
+      return;
     }
-  }, [currentRoute, user]);
 
-  const handleGainXp = (amount: number) => {
+    if (user.role === 'teacher' && STUDENT_ONLY_ROUTES.includes(currentRoute)) {
+      showToast('🔒 That page is for Students — redirected to your Teacher dashboard.');
+      navigateTo('/app/teacher');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentRoute, user, authLoading]);
+
+  // Resolves a shared "Copy Profile Link" (?u=username) into a real profile
+  // id when the community profile route is opened fresh (not just navigated
+  // to in-session, where communityProfileId is already set via state).
+  useEffect(() => {
+    if (currentRoute !== '/app/community/profile') return;
+    const params = new URLSearchParams(window.location.search);
+    const username = params.get('u');
+    if (!username) return;
+    socialProfileService
+      .getIdByUsername(username)
+      .then((id) => {
+        if (id) setCommunityProfileId(id);
+        else showToast(`No student found with username @${username}.`);
+      })
+      .catch(() => showToast('Could not resolve that profile link.'))
+      .finally(() => {
+        params.delete('u');
+        const cleanUrl = window.location.pathname + (params.toString() ? `?${params}` : '');
+        window.history.replaceState({}, '', cleanUrl);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentRoute]);
+
+  // Server-authoritative XP: writes to the xp_activities ledger via
+  // award_xp() (see supabase/migrations/009_functions.sql), then reloads the
+  // profile so currentXp/level reflect what the server actually recorded —
+  // the client no longer computes or trusts its own XP math.
+  const handleGainXp = async (amount: number, activityType: 'quiz_completed' | 'daily_login' | 'streak_bonus' = 'quiz_completed', referenceId?: string) => {
     if (!user) return;
-    setUser((prev) => {
-      if (!prev) return null;
-      const newXp = prev.currentXp + amount;
-      let newLevel = prev.level;
-      let nextLevelXp = prev.nextLevelXp;
+    const prevLevel = user.level;
+    try {
+      const result = await xpService.awardXp(user.id, activityType, amount, referenceId);
+      await refreshProfile();
+      await achievementService.checkAndUnlock(user.id).catch(() => {});
 
-      if (newXp >= prev.nextLevelXp) {
-        newLevel += 1;
-        nextLevelXp = Math.floor(prev.nextLevelXp * 1.3);
-        showToast(`🎉 Level Up! You reached Level ${newLevel} Quantum Scholar!`);
+      if (result?.leveled_up) {
+        showToast(`🎉 Level Up! You reached Level ${result.level} Quantum Scholar!`);
         try {
-          confetti({
-            particleCount: 100,
-            spread: 90,
-            origin: { y: 0.5 },
-            colors: ['#58f5e0', '#2dd8c4', '#ccbdff'],
-          });
+          confetti({ particleCount: 100, spread: 90, origin: { y: 0.5 }, colors: ['#58f5e0', '#2dd8c4', '#ccbdff'] });
         } catch {}
-      } else {
+      } else if (result?.awarded) {
         showToast(`+${amount} XP Earned in study streak!`);
       }
-
-      return {
-        ...prev,
-        currentXp: newXp,
-        level: newLevel,
-        nextLevelXp: nextLevelXp,
-      };
-    });
+      void prevLevel;
+    } catch (err) {
+      console.error('Failed to award XP', err);
+    }
   };
 
   const handleLoginSuccess = (loggedUser: UserProfile) => {
-    setUser(loggedUser);
     setIsAuthModalOpen(false);
     showToast(`Welcome back, ${loggedUser.name}! (${loggedUser.role === 'teacher' ? 'Teacher Studio' : 'Student Portal'})`);
 
@@ -142,23 +233,10 @@ export default function App() {
     }
   };
 
-  const handleLogout = () => {
-    setUser(null);
+  const handleLogout = async () => {
+    await signOut();
     showToast('Signed out of Vormirix.');
     navigateTo('/');
-  };
-
-  const handleSwitchRole = () => {
-    if (!user) return;
-    if (user.role === 'student') {
-      setUser(TEACHER_USER);
-      navigateTo('/app/teacher');
-      showToast('Switched to Verified Educator persona (Dr. Vikram Desai)');
-    } else {
-      setUser(INITIAL_USER);
-      navigateTo('/app');
-      showToast('Switched to Student Scholar persona (Rahul Sharma)');
-    }
   };
 
   const handleOpenPlayer = (course: Course, lessonIndex: number = 0) => {
@@ -183,7 +261,7 @@ export default function App() {
     }
   };
 
-  const handleEnrollOrBuy = (course: Course) => {
+  const handleEnrollOrBuy = async (course: Course) => {
     if (!user) {
       setAuthModalMode('signup');
       setIsAuthModalOpen(true);
@@ -196,72 +274,63 @@ export default function App() {
     }
 
     if (course.isFree) {
-      // Free enroll instantly
-      setUser((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          enrolledCourseIds: [...(prev.enrolledCourseIds || []), course.id],
-        };
-      });
-      setCourses((prev) =>
-        prev.map((c) =>
-          c.id === course.id ? { ...c, enrolledCount: c.enrolledCount + 1 } : c
-        )
-      );
-      showToast(`🎉 Enrolled in "${course.title}" for Free!`);
+      // Free enroll — enroll_free_course() re-checks is_free server-side
+      // (see 009_functions.sql), so a tampered client can't get free access
+      // to a paid course this way.
       try {
-        confetti({
-          particleCount: 80,
-          spread: 70,
-          origin: { y: 0.5 },
-          colors: ['#58f5e0', '#2dd8c4'],
-        });
-      } catch {}
-      handleOpenPlayer(course, 0);
+        await enrollmentService.enrollFree(course.id);
+        await Promise.all([refreshProfile(), reloadCourses()]);
+        showToast(`🎉 Enrolled in "${course.title}" for Free!`);
+        try {
+          confetti({ particleCount: 80, spread: 70, origin: { y: 0.5 }, colors: ['#58f5e0', '#2dd8c4'] });
+        } catch {}
+        handleOpenPlayer(course, 0);
+      } catch (err) {
+        showToast(err instanceof Error ? err.message : 'Enrollment failed. Please try again.');
+      }
     } else {
-      // Paid course -> Open Razorpay checkout modal
+      // Paid course -> Open checkout modal (server-verified, see PaymentModal + paymentService)
       setCheckoutCourse(course);
     }
   };
 
-  const handlePaymentSuccess = (courseId: string) => {
+  // Called by PaymentModal only after the verify-payment Edge Function has
+  // confirmed the order server-side and finalize_payment() has already
+  // created the paid enrollment row — this handler just refreshes local
+  // state to reflect what the server already committed.
+  const handlePaymentSuccess = async (course: Course) => {
     if (!user) return;
-    setUser((prev) => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        enrolledCourseIds: [...(prev.enrolledCourseIds || []), courseId],
-      };
-    });
-    setCourses((prev) =>
-      prev.map((c) =>
-        c.id === courseId ? { ...c, enrolledCount: c.enrolledCount + 1 } : c
-      )
-    );
+    await Promise.all([refreshProfile(), reloadCourses()]);
     showToast('🚀 Payment successful! Lifetime masterclass access unlocked.');
     setCheckoutCourse(null);
-    if (selectedCourse && selectedCourse.id === courseId) {
+    if (selectedCourse && selectedCourse.id === course.id) {
       handleOpenPlayer(selectedCourse, 0);
     }
   };
 
-  const handleCompleteLesson = (lessonId: string, xpReward: number) => {
+  // Idempotent server-side (complete_lesson() re-checks enrollment/preview
+  // access and only awards XP once per lesson, see 009_functions.sql) — the
+  // xpReward param is now only used for an optimistic toast; the real amount
+  // credited comes back from the server.
+  const handleCompleteLesson = async (lessonId: string, xpReward: number) => {
     if (!user) return;
-    if (!user.completedLessonIds?.includes(lessonId)) {
-      setUser((prev) => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          completedLessonIds: [...(prev.completedLessonIds || []), lessonId],
-        };
-      });
-      handleGainXp(xpReward);
+    if (user.completedLessonIds?.includes(lessonId)) return;
+
+    try {
+      const { alreadyCompleted, xpAwarded } = await progressService.completeLesson(lessonId);
+      await refreshProfile();
+      await achievementService.checkAndUnlock(user.id).catch(() => {});
+      if (!alreadyCompleted) {
+        showToast(`+${xpAwarded || xpReward} XP Earned! Lesson completed.`);
+      }
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Could not mark lesson complete.');
     }
   };
 
   const handleCreateCourseSuccess = (newCourse: Course) => {
     setCourses((prev) => [newCourse, ...prev]);
+    setTeacherCourses((prev) => [newCourse, ...prev]);
     showToast(`Masterclass "${newCourse.title}" published successfully!`);
     setIsCreateCourseOpen(false);
   };
@@ -273,26 +342,92 @@ export default function App() {
     navigateTo('/app/feed');
   };
 
-  const handleDeleteCourse = (courseId: string) => {
-    setCourses((prev) => prev.filter((c) => c.id !== courseId));
-    showToast('Course removed from your catalog.');
+  const handleDeleteCourse = async (courseId: string) => {
+    try {
+      await courseService.deleteCourse(courseId);
+      setCourses((prev) => prev.filter((c) => c.id !== courseId));
+      setTeacherCourses((prev) => prev.filter((c) => c.id !== courseId));
+      showToast('Course removed from your catalog.');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to delete course.');
+    }
   };
 
-  const handleDeleteVideo = (videoId: string) => {
-    setVideos((prev) => prev.filter((v) => v.id !== videoId));
-    showToast('Short video removed from Reels feed.');
+  const handleDeleteVideo = async (videoId: string) => {
+    try {
+      await videoService.deleteVideo(videoId);
+      setVideos((prev) => prev.filter((v) => v.id !== videoId));
+      showToast('Short video removed from Reels feed.');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to delete video.');
+    }
   };
 
-  const handleUpgradeSuccess = (planName: 'Pro' | 'Team') => {
+  const handleUpgradeSuccess = async (planName: 'Pro' | 'Team') => {
     if (!user) return;
-    setUser((prev) => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        plan: planName,
-      };
-    });
-    showToast(`🚀 Welcome to Vormirix ${planName}! All premium AI tools unlocked.`);
+    try {
+      await profileService.updateProfile(user.id, { plan: planName });
+      await refreshProfile();
+      showToast(`🚀 Welcome to Vormirix ${planName}! All premium AI tools unlocked.`);
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Upgrade failed. Please try again.');
+    }
+  };
+
+  // ReelsFeed handlers — real like/save/comment/follow writes. Fixes the
+  // prop-contract mismatch flagged in VORMIRIX_BACKEND_PLAN.md (App.tsx
+  // previously passed onGainXp/onOpenCourseDetail/onOpenDoubtSolver/
+  // onOpenUpload props that ReelsFeed.tsx's actual interface never declared).
+  const handleLikeVideo = async (videoId: string) => {
+    if (!user) return;
+    const video = videos.find((v) => v.id === videoId);
+    const currentlyLiked = Boolean(video?.isLiked);
+    setVideos((prev) =>
+      prev.map((v) => (v.id === videoId ? { ...v, isLiked: !currentlyLiked, likesCount: v.likesCount + (currentlyLiked ? -1 : 1) } : v))
+    );
+    try {
+      await videoService.toggleLike(videoId, user.id, currentlyLiked);
+    } catch {
+      await reloadFeed();
+    }
+  };
+
+  const handleSaveVideo = async (videoId: string) => {
+    if (!user) return;
+    const video = videos.find((v) => v.id === videoId);
+    const currentlySaved = Boolean(video?.isSaved);
+    setVideos((prev) =>
+      prev.map((v) => (v.id === videoId ? { ...v, isSaved: !currentlySaved, savesCount: v.savesCount + (currentlySaved ? -1 : 1) } : v))
+    );
+    try {
+      await videoService.toggleSave(videoId, user.id, currentlySaved);
+      showToast(currentlySaved ? 'Video removed from bookmarks' : 'Video saved to study bookmarks!');
+    } catch {
+      await reloadFeed();
+    }
+  };
+
+  const handleAddComment = async (videoId: string, text: string) => {
+    if (!user) return;
+    try {
+      const comment = await videoService.addComment(videoId, user.id, text);
+      setVideos((prev) =>
+        prev.map((v) => (v.id === videoId ? { ...v, comments: [...v.comments, comment], commentsCount: v.commentsCount + 1 } : v))
+      );
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to post comment.');
+    }
+  };
+
+  const handleFollowTeacher = async (teacherId: string) => {
+    if (!user) return;
+    const currentlyFollowing = Boolean(user.followingTeacherIds?.includes(teacherId));
+    try {
+      await videoService.toggleFollow(user.id, teacherId, currentlyFollowing);
+      await refreshProfile();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Failed to update follow status.');
+    }
   };
 
   // Determine if we are on a public route or authenticated app route
@@ -303,6 +438,21 @@ export default function App() {
     currentRoute === '/courses' ||
     currentRoute === '/login' ||
     currentRoute === '/signup';
+
+  // Brief session-restore state only (Supabase session check / dev
+  // auto-login, see src/hooks/useAuth.ts) — avoids a flash of the public
+  // marketing page for a direct /app/* link before the real user resolves.
+  // Reuses the app's existing color tokens rather than introducing new UI.
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-[#111319] text-[#e1e2ea] flex items-center justify-center font-sans">
+        <div className="flex items-center gap-2.5 text-xs font-bold text-[#bacac6]">
+          <div className="w-4 h-4 border-2 border-[#58f5e0] border-t-transparent rounded-full animate-spin" />
+          <span>Loading Vormirix...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#111319] text-[#e1e2ea] flex flex-col selection:bg-[#2dd8c4] selection:text-[#005a50] overflow-x-hidden font-sans">
@@ -337,6 +487,9 @@ export default function App() {
               <AuthPage
                 initialMode="login"
                 initialRole={authRolePreset}
+                onSignIn={signIn}
+                onSignUp={signUp}
+                onSignOut={signOut}
                 onLoginSuccess={handleLoginSuccess}
                 onNavigateHome={() => navigateTo('/')}
               />
@@ -347,6 +500,9 @@ export default function App() {
               <AuthPage
                 initialMode="signup"
                 initialRole={authRolePreset}
+                onSignIn={signIn}
+                onSignUp={signUp}
+                onSignOut={signOut}
                 onLoginSuccess={handleLoginSuccess}
                 onNavigateHome={() => navigateTo('/')}
               />
@@ -373,6 +529,17 @@ export default function App() {
                   setAuthModalMode('signup');
                   setIsAuthModalOpen(true);
                 }}
+                onSelectPricingPlan={(plan, cycle) => {
+                  // Guests have no account to upgrade yet — remember the
+                  // plan they picked and send them to signup; existing
+                  // in-app upgrade flow (UpgradeModal, triggered from
+                  // StudioModal) reuses this same selectedPlanForUpgrade /
+                  // billingCycle state once they're signed in.
+                  setSelectedPlanForUpgrade(plan);
+                  setBillingCycle(cycle);
+                  setAuthRolePreset('student');
+                  navigateTo('/signup');
+                }}
               />
             )}
           </main>
@@ -395,7 +562,6 @@ export default function App() {
               user={user}
               activeRoute={currentRoute}
               onNavigate={(route) => navigateTo(route)}
-              onSwitchRole={handleSwitchRole}
               onLogout={handleLogout}
               onOpenCreateCourse={() => setIsCreateCourseOpen(true)}
               onOpenUploadVideo={() => setIsUploadVideoOpen(true)}
@@ -417,7 +583,6 @@ export default function App() {
                 setStudioTab('tutor');
                 setIsStudioOpen(true);
               }}
-              onSwitchRole={handleSwitchRole}
               onLogout={handleLogout}
             />
 
@@ -448,8 +613,9 @@ export default function App() {
                 (currentRoute === '/app' && user.role === 'teacher')) && (
                 <TeacherDashboard
                   user={user}
-                  courses={courses}
+                  courses={teacherCourses}
                   videos={videos}
+                  activeRoute={currentRoute}
                   onOpenCreateCourse={() => setIsCreateCourseOpen(true)}
                   onOpenUploadVideo={() => setIsUploadVideoOpen(true)}
                   onSelectCourse={handleSelectCourse}
@@ -462,9 +628,13 @@ export default function App() {
               {currentRoute === '/app/feed' && (
                 <ReelsFeed
                   videos={videos}
+                  courses={courses}
                   user={user}
-                  onGainXp={handleGainXp}
-                  onOpenCourseDetail={(courseId) => {
+                  onLikeVideo={handleLikeVideo}
+                  onSaveVideo={handleSaveVideo}
+                  onAddComment={handleAddComment}
+                  onFollowTeacher={handleFollowTeacher}
+                  onNavigateToCourse={(courseId) => {
                     const matched = courses.find((c) => c.id === courseId);
                     if (matched) {
                       handleSelectCourse(matched);
@@ -472,22 +642,7 @@ export default function App() {
                       navigateTo('/app/courses');
                     }
                   }}
-                  onOpenDoubtSolver={() => {
-                    setStudioTab('tutor');
-                    setIsStudioOpen(true);
-                  }}
-                  onOpenUpload={() => setIsUploadVideoOpen(true)}
-                  onSaveVideo={(videoId) => {
-                    setUser((prev) => {
-                      if (!prev) return null;
-                      const isSaved = prev.savedVideoIds?.includes(videoId);
-                      const updated = isSaved
-                        ? prev.savedVideoIds?.filter((id) => id !== videoId)
-                        : [...(prev.savedVideoIds || []), videoId];
-                      showToast(isSaved ? 'Video removed from bookmarks' : 'Video saved to study bookmarks!');
-                      return { ...prev, savedVideoIds: updated };
-                    });
-                  }}
+                  onShowToast={showToast}
                 />
               )}
 
@@ -544,6 +699,8 @@ export default function App() {
                 <StudentDashboard
                   user={user}
                   courses={courses}
+                  weeklyXp={weeklyXp}
+                  achievements={achievements}
                   onNavigateToCourse={(cId) => {
                     const matched = courses.find((c) => c.id === cId);
                     if (matched) handleSelectCourse(matched);
@@ -563,7 +720,50 @@ export default function App() {
                 <AchievementsView
                   user={user}
                   courses={courses}
+                  achievements={achievements}
                   onNavigate={(route) => navigateTo(route)}
+                />
+              )}
+
+              {/* ROUTE 11: Community Feed + Ask & Solve */}
+              {currentRoute === '/app/community' && (
+                <CommunityPage
+                  user={user}
+                  onShowToast={showToast}
+                  onOpenProfile={(userId) => {
+                    setCommunityProfileId(userId);
+                    navigateTo('/app/community/profile');
+                  }}
+                  onOpenQuestion={(question) => {
+                    setSelectedQuestion(question);
+                    navigateTo('/app/community/question');
+                  }}
+                />
+              )}
+
+              {/* ROUTE 12: Question Detail (Ask & Solve) */}
+              {currentRoute === '/app/community/question' && selectedQuestion && (
+                <QuestionDetailPage
+                  question={selectedQuestion}
+                  user={user}
+                  onBack={() => navigateTo('/app/community')}
+                  onShowToast={showToast}
+                  onOpenAuthorProfile={(authorId) => {
+                    setCommunityProfileId(authorId);
+                    navigateTo('/app/community/profile');
+                  }}
+                  onQuestionUpdated={setSelectedQuestion}
+                />
+              )}
+
+              {/* ROUTE 13: Public Community Profile */}
+              {currentRoute === '/app/community/profile' && (
+                <StudentProfilePage
+                  profileId={communityProfileId || user.id}
+                  viewer={user}
+                  onBack={() => navigateTo('/app/community')}
+                  onShowToast={showToast}
+                  onOpenProfile={(userId) => setCommunityProfileId(userId)}
                 />
               )}
 
@@ -572,9 +772,25 @@ export default function App() {
                 <StudentProfile
                   user={user}
                   courses={courses}
-                  onUpdateUser={(updated) => setUser((prev) => (prev ? { ...prev, ...updated } : null))}
+                  achievements={achievements}
+                  onUpdateUser={async (updated) => {
+                    await profileService.updateProfile(user.id, {
+                      full_name: updated.name,
+                      username: updated.username,
+                      bio: updated.bio,
+                      avatar_url: updated.avatarUrl,
+                      location: updated.location,
+                      education_level: updated.educationLevel,
+                      interests: updated.interests,
+                    });
+                    await refreshProfile();
+                  }}
                   onOpenPlayer={(course) => handleOpenPlayer(course, 0)}
                   onShowToast={showToast}
+                  onViewCommunityProfile={() => {
+                    setCommunityProfileId(user.id);
+                    navigateTo('/app/community/profile');
+                  }}
                 />
               )}
             </main>
@@ -587,21 +803,22 @@ export default function App() {
       {/* ========================================================= */}
 
       {/* Razorpay Course Payment Modal */}
-      {checkoutCourse && (
+      {checkoutCourse && user && (
         <PaymentModal
           isOpen={true}
           onClose={() => setCheckoutCourse(null)}
           course={checkoutCourse}
-          user={user || INITIAL_USER}
+          user={user}
           onPaymentSuccess={handlePaymentSuccess}
         />
       )}
 
       {/* Interactive Studio Workspace Modal */}
+      {user && (
       <StudioModal
         isOpen={isStudioOpen}
         onClose={() => setIsStudioOpen(false)}
-        user={user || INITIAL_USER}
+        user={user}
         initialTab={studioTab}
         onGainXp={handleGainXp}
         onOpenUpgrade={() => {
@@ -609,12 +826,16 @@ export default function App() {
           setIsUpgradeOpen(true);
         }}
       />
+      )}
 
       {/* Quick Auth Modal for preview enroll buttons */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         initialMode={authModalMode}
+        onSignIn={signIn}
+        onSignUp={signUp}
+        onSignOut={signOut}
         onLoginSuccess={handleLoginSuccess}
       />
 

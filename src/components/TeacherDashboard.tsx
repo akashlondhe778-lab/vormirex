@@ -18,7 +18,7 @@ import {
   Upload,
   Users,
 } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Area,
   AreaChart,
@@ -36,6 +36,13 @@ interface TeacherDashboardProps {
   user: UserProfile;
   courses: Course[];
   videos: ShortVideo[];
+  /** Current URL (e.g. "/app/teacher/videos") — used to keep the in-page
+   * tab in sync with which sidebar/topbar item was clicked. Without this
+   * the component had its own tab state completely disconnected from the
+   * route: navigating to /app/teacher/videos changed the URL but nothing
+   * ever called setActiveTab, so every nav item just showed whatever tab
+   * happened to be active already. */
+  activeRoute: string;
   onOpenCreateCourse: () => void;
   onOpenUploadVideo: () => void;
   onSelectCourse: (course: Course) => void;
@@ -43,25 +50,43 @@ interface TeacherDashboardProps {
   onDeleteVideo: (videoId: string) => void;
 }
 
+function tabForRoute(route: string): 'courses' | 'videos' | 'revenue' {
+  if (route === '/app/teacher/videos') return 'videos';
+  // "Analytics" and "Revenue" are separate sidebar links but share one
+  // combined "Revenue & Sales Analytics" tab in this view — there's no
+  // separate analytics-only content to route to without adding new UI.
+  if (route === '/app/teacher/revenue' || route === '/app/teacher/analytics') return 'revenue';
+  // /app/teacher (Overview) and /app/teacher/courses both land on Courses.
+  return 'courses';
+}
+
 export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   user,
   courses,
   videos,
+  activeRoute,
   onOpenCreateCourse,
   onOpenUploadVideo,
   onSelectCourse,
   onDeleteCourse,
   onDeleteVideo,
 }) => {
-  const [activeTab, setActiveTab] = useState<'courses' | 'videos' | 'revenue'>('courses');
+  const [activeTab, setActiveTab] = useState<'courses' | 'videos' | 'revenue'>(() => tabForRoute(activeRoute));
 
-  const teacherCourses = courses.filter(
-    (c) => c.teacherId === user.id || user.id === 'teacher-1' || c.teacherName === user.name
-  );
+  // Re-sync whenever the sidebar/topbar navigates to a different teacher
+  // route; clicking the in-page tab buttons below still updates
+  // immediately via setActiveTab without needing a URL change.
+  useEffect(() => {
+    setActiveTab(tabForRoute(activeRoute));
+  }, [activeRoute]);
 
-  const teacherVideos = videos.filter(
-    (v) => v.teacherId === user.id || user.id === 'teacher-1' || v.teacherName === user.name
-  );
+  // teacherId now comes straight from courses.teacher_id / short_videos.creator_id
+  // (real Supabase Auth UUIDs — see VORMIRIX_BACKEND_PLAN.md). The old
+  // fallback here (`user.id === 'teacher-1' || c.teacherName === user.name`)
+  // was a demo-persona workaround that would have shown courses belonging to
+  // a different teacher who happened to share a display name.
+  const teacherCourses = courses.filter((c) => c.teacherId === user.id);
+  const teacherVideos = videos.filter((v) => v.teacherId === user.id);
 
   const totalStudents = teacherCourses.reduce((acc, c) => acc + c.enrolledCount, 0);
   const totalRevenue = teacherCourses.reduce((acc, c) => acc + (c.isFree ? 0 : c.price * c.enrolledCount), 0);

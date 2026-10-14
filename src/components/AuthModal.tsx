@@ -11,14 +11,19 @@ import {
   X,
 } from 'lucide-react';
 import React, { useState } from 'react';
-import { INITIAL_USER, TEACHER_USER } from '../data/mockData';
+import { DEMO_ACCOUNT_PASSWORD, DEMO_PERSONAS } from '../data/mockData';
+import { authService } from '../services/authService';
 import { UserProfile } from '../types';
+import { describeAuthError } from '../utils/authErrors';
 import { VormirixLogo } from './VormirixLogo';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialMode?: 'login' | 'signup';
+  onSignIn: (email: string, password: string) => Promise<UserProfile>;
+  onSignUp: (email: string, password: string, fullName: string, role: 'student' | 'teacher') => Promise<UserProfile>;
+  onSignOut: () => Promise<void>;
   onLoginSuccess: (user: UserProfile) => void;
 }
 
@@ -26,6 +31,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
   initialMode = 'login',
+  onSignIn,
+  onSignUp,
+  onSignOut,
   onLoginSuccess,
 }) => {
   const [mode, setMode] = useState<'login' | 'signup'>(initialMode);
@@ -36,36 +44,38 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [roleInput, setRoleInput] = useState<'student' | 'teacher'>('student');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
-  const personas: UserProfile[] = [
-    INITIAL_USER,
-    {
-      id: 'student-2',
-      name: 'Ananya Patel',
-      email: 'ananya.patel@vormirex.edu',
-      role: 'student',
-      avatarUrl:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuCxsrpqrGniGp3DNvY905_jh03qDvhYooKDn3jqVsdWctnS6CI72kTPskoJyyd7JJZgXAmqvLNxkIbpbYhPDglW9hiGFNC7htYvN6Z3VDuvK1W1xhkw18cn4xr8IM37l2oJMTumEQryS0mRQmFAuSYAdcrIpEyzG7Xug7bfJYOa3G9u2iVVUgH5nf1FJJVr2xUSLDAOlRvraCq4LEIXA7Y0EPEipoGHVPXqY-wjkIw58VDOOFP7xG_N',
-      bio: 'High school senior practicing daily STEM problems and physics roadmaps.',
-      level: 18,
-      currentXp: 4890,
-      nextLevelXp: 5500,
-      streakDays: 24,
-      plan: 'Pro',
-      completedQuests: 62,
-      solvedDoubts: 89,
-      enrolledCourseIds: ['course-1', 'course-2'],
-      completedLessonIds: ['c1-l1', 'c1-l2', 'c2-l1'],
-      savedVideoIds: ['video-1', 'video-2'],
-      followingTeacherIds: ['teacher-1'],
-      learningHours: 36.0,
-    },
-    TEACHER_USER,
-  ];
+  // Student and Teacher are separate account types — see the matching
+  // helper + comment in AuthPage.tsx for the full rationale.
+  const assertRoleOrSignOut = async (user: UserProfile) => {
+    if (user.role !== roleInput) {
+      await onSignOut();
+      const actualRoleLabel = user.role === 'teacher' ? 'Teacher' : 'Student';
+      throw new Error(`This account is registered as a ${actualRoleLabel}. Please use ${actualRoleLabel} Login instead.`);
+    }
+    return user;
+  };
 
-  const handleSubmitCustom = (e: React.FormEvent) => {
+  const demoPersonasForRole = DEMO_PERSONAS.filter((p) => p.role === roleInput);
+
+  const handlePersonaLogin = async (email: string) => {
+    setErrorMessage('');
+    setIsSubmitting(true);
+    try {
+      const user = await onSignIn(email, DEMO_ACCOUNT_PASSWORD);
+      onLoginSuccess(await assertRoleOrSignOut(user));
+      onClose();
+    } catch (err) {
+      setErrorMessage(describeAuthError(err));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmitCustom = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
 
@@ -74,35 +84,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       return;
     }
 
-    const newUser: UserProfile = {
-      id: `user-${Date.now()}`,
-      name: nameInput || (roleInput === 'teacher' ? 'Prof. Educator' : 'Scholar Student'),
-      email: emailInput || (roleInput === 'teacher' ? 'educator@vormirex.edu' : 'student@vormirex.edu'),
-      role: roleInput,
-      avatarUrl:
-        roleInput === 'teacher'
-          ? TEACHER_USER.avatarUrl
-          : INITIAL_USER.avatarUrl,
-      bio:
-        roleInput === 'teacher'
-          ? 'Computer Science & STEM instructor on Vormirix LMS.'
-          : 'Dedicated student learning full-stack and algorithms.',
-      level: roleInput === 'teacher' ? 25 : 1,
-      currentXp: roleInput === 'teacher' ? 8500 : 150,
-      nextLevelXp: roleInput === 'teacher' ? 9000 : 500,
-      streakDays: roleInput === 'teacher' ? 30 : 1,
-      plan: 'Starter',
-      completedQuests: 0,
-      solvedDoubts: 0,
-      enrolledCourseIds: ['course-3'],
-      completedLessonIds: ['c3-l1'],
-      savedVideoIds: [],
-      followingTeacherIds: ['teacher-1'],
-      learningHours: 1.5,
-    };
-
-    onLoginSuccess(newUser);
-    onClose();
+    setIsSubmitting(true);
+    try {
+      const user =
+        mode === 'signup'
+          ? await onSignUp(emailInput, passwordInput, nameInput, roleInput)
+          : await assertRoleOrSignOut(await onSignIn(emailInput, passwordInput));
+      onLoginSuccess(user);
+      onClose();
+    } catch (err) {
+      setErrorMessage(describeAuthError(err));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -138,15 +132,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             ⚡ Quick 1-Click Persona Login:
           </span>
           <div className="flex flex-col gap-2">
-            {personas.map((p) => (
+            {demoPersonasForRole.map((p) => (
               <button
-                key={p.name}
+                key={p.email}
                 type="button"
-                onClick={() => {
-                  onLoginSuccess(p);
-                  onClose();
-                }}
-                className="flex items-center justify-between p-2.5 rounded-xl bg-[#111319] hover:bg-[#272a30] border border-[#272a30] hover:border-[#58f5e0] transition-all text-left group cursor-pointer"
+                disabled={isSubmitting}
+                onClick={() => handlePersonaLogin(p.email)}
+                className="flex items-center justify-between p-2.5 rounded-xl bg-[#111319] hover:bg-[#272a30] border border-[#272a30] hover:border-[#58f5e0] transition-all text-left group cursor-pointer disabled:opacity-50"
               >
                 <div className="flex items-center gap-3">
                   <img
@@ -159,7 +151,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       {p.name}
                     </h4>
                     <p className="text-[10px] text-[#bacac6] capitalize">
-                      {p.role} • Lv.{p.level} {p.role === 'teacher' ? '👨‍🏫 Instructor' : '🎓 Student'}
+                      {p.role} {p.role === 'teacher' ? '👨‍🏫 Instructor' : '🎓 Student'}
                     </p>
                   </div>
                 </div>
@@ -169,6 +161,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </button>
             ))}
           </div>
+          {errorMessage && (
+            <p className="text-[10px] text-red-400 mt-2">{errorMessage}</p>
+          )}
         </div>
 
         <div className="relative flex py-2 items-center">
@@ -187,56 +182,57 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           )}
 
+          {/* Account type — Student and Teacher are separate account
+              types with separate login flows, chosen before credentials on
+              both Sign In and Create Account (see assertRoleOrSignOut above
+              for how a mismatch is handled). */}
+          <div>
+            <label className="text-[11px] uppercase font-bold text-[#bacac6] block mb-1.5">
+              {mode === 'login' ? 'How do you want to continue?' : 'I want to join as a'}
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setRoleInput('student')}
+                className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  roleInput === 'student'
+                    ? 'bg-[#58f5e0]/15 border-[#58f5e0] text-[#58f5e0]'
+                    : 'bg-[#111319] border-[#272a30] text-[#bacac6]'
+                }`}
+              >
+                <GraduationCap className="w-4 h-4" />
+                <span>{mode === 'login' ? 'Student Login' : 'Student'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setRoleInput('teacher')}
+                className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  roleInput === 'teacher'
+                    ? 'bg-[#58f5e0]/15 border-[#58f5e0] text-[#58f5e0]'
+                    : 'bg-[#111319] border-[#272a30] text-[#bacac6]'
+                }`}
+              >
+                <UserCheck className="w-4 h-4" />
+                <span>{mode === 'login' ? 'Teacher Login' : 'Teacher / Educator'}</span>
+              </button>
+            </div>
+          </div>
+
           {mode === 'signup' && (
-            <>
-              {/* Role Selection */}
-              <div>
-                <label className="text-[11px] uppercase font-bold text-[#bacac6] block mb-1.5">
-                  I want to join as a
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setRoleInput('student')}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                      roleInput === 'student'
-                        ? 'bg-[#58f5e0]/15 border-[#58f5e0] text-[#58f5e0]'
-                        : 'bg-[#111319] border-[#272a30] text-[#bacac6]'
-                    }`}
-                  >
-                    <GraduationCap className="w-4 h-4" />
-                    <span>Student</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setRoleInput('teacher')}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                      roleInput === 'teacher'
-                        ? 'bg-[#58f5e0]/15 border-[#58f5e0] text-[#58f5e0]'
-                        : 'bg-[#111319] border-[#272a30] text-[#bacac6]'
-                    }`}
-                  >
-                    <UserCheck className="w-4 h-4" />
-                    <span>Teacher / Educator</span>
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[11px] uppercase font-bold text-[#bacac6] block mb-1">
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={nameInput}
-                  onChange={(e) => setNameInput(e.target.value)}
-                  placeholder="e.g. Rahul Sharma"
-                  className="w-full bg-[#111319] border border-[#3b4a47] focus:border-[#58f5e0] rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
-                />
-              </div>
-            </>
+            <div>
+              <label className="text-[11px] uppercase font-bold text-[#bacac6] block mb-1">
+                Full Name
+              </label>
+              <input
+                type="text"
+                required
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                placeholder="e.g. Rahul Sharma"
+                className="w-full bg-[#111319] border border-[#3b4a47] focus:border-[#58f5e0] rounded-xl px-3 py-2 text-xs text-white focus:outline-none"
+              />
+            </div>
           )}
 
           <div>
@@ -303,7 +299,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={() => alert('Password reset link sent to your registered email address!')}
+                onClick={async () => {
+                  if (!emailInput) {
+                    setErrorMessage('Enter your email address first, then tap Forgot Password.');
+                    return;
+                  }
+                  try {
+                    await authService.resetPasswordForEmail(emailInput);
+                    setErrorMessage('');
+                    alert('Password reset link sent — check your inbox.');
+                  } catch (err) {
+                    setErrorMessage(describeAuthError(err));
+                  }
+                }}
                 className="text-[11px] text-[#58f5e0] hover:underline"
               >
                 Forgot Password?
@@ -313,9 +321,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
           <button
             type="submit"
-            className="w-full mt-2 text-xs uppercase tracking-wider font-bold bg-[#2dd8c4] text-[#005a50] py-3 rounded-full hover:scale-95 transition-transform shadow-[0_0_15px_rgba(45,216,196,0.25)] cursor-pointer"
+            disabled={isSubmitting}
+            className="w-full mt-2 text-xs uppercase tracking-wider font-bold bg-[#2dd8c4] text-[#005a50] py-3 rounded-full hover:scale-95 transition-transform shadow-[0_0_15px_rgba(45,216,196,0.25)] cursor-pointer disabled:opacity-50 disabled:hover:scale-100"
           >
-            {mode === 'login' ? 'Log In & Continue' : 'Create Account & Start Learning'}
+            {isSubmitting
+              ? 'Please wait...'
+              : mode === 'login'
+              ? `Log In as ${roleInput === 'teacher' ? 'Teacher' : 'Student'}`
+              : 'Create Account & Start Learning'}
           </button>
         </form>
 

@@ -92,7 +92,7 @@ export const CoursePlayer: React.FC<CoursePlayerProps> = ({
 
   return (
     <div className="min-h-screen bg-[#0c0e14] text-[#e1e2ea] flex flex-col select-none">
-      {/* Top Player Navbar */}
+    {/* Top Player Navbar */}
       <header className="bg-[#111319] border-b border-[#272a30] px-4 py-3 sticky top-0 z-30 flex items-center justify-between">
         <div className="flex items-center gap-3 min-w-0">
           <button

@@ -1,12 +1,16 @@
-import { ArrowLeft, ArrowRight, Bot, Check, Eye, EyeOff, GraduationCap, Lock, Mail, Sparkles, User, UserCheck, Zap } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, GraduationCap, Lock, Mail, User, UserCheck, Zap } from 'lucide-react';
 import React, { useState } from 'react';
-import { INITIAL_USER, TEACHER_USER } from '../../data/mockData';
+import { DEMO_ACCOUNT_PASSWORD, DEMO_PERSONAS } from '../../data/mockData';
 import { UserProfile } from '../../types';
+import { describeAuthError } from '../../utils/authErrors';
 import { VormirixLogo } from '../VormirixLogo';
 
 interface AuthPageProps {
   initialMode: 'login' | 'signup';
   initialRole?: 'student' | 'teacher';
+  onSignIn: (email: string, password: string) => Promise<UserProfile>;
+  onSignUp: (email: string, password: string, fullName: string, role: 'student' | 'teacher') => Promise<UserProfile>;
+  onSignOut: () => Promise<void>;
   onLoginSuccess: (user: UserProfile) => void;
   onNavigateHome: () => void;
 }
@@ -14,6 +18,9 @@ interface AuthPageProps {
 export const AuthPage: React.FC<AuthPageProps> = ({
   initialMode,
   initialRole = 'student',
+  onSignIn,
+  onSignUp,
+  onSignOut,
   onLoginSuccess,
   onNavigateHome,
 }) => {
@@ -25,34 +32,39 @@ export const AuthPage: React.FC<AuthPageProps> = ({
   const [confirmPasswordInput, setConfirmPasswordInput] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const personas: UserProfile[] = [
-    INITIAL_USER,
-    {
-      id: 'student-2',
-      name: 'Ananya Patel',
-      email: 'ananya.patel@vormirex.edu',
-      role: 'student',
-      avatarUrl:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuCxsrpqrGniGp3DNvY905_jh03qDvhYooKDn3jqVsdWctnS6CI72kTPskoJyyd7JJZgXAmqvLNxkIbpbYhPDglW9hiGFNC7htYvN6Z3VDuvK1W1xhkw18cn4xr8IM37l2oJMTumEQryS0mRQmFAuSYAdcrIpEyzG7Xug7bfJYOa3G9u2iVVUgH5nf1FJJVr2xUSLDAOlRvraCq4LEIXA7Y0EPEipoGHVPXqY-wjkIw58VDOOFP7xG_N',
-      bio: 'High school senior practicing daily STEM problems and physics roadmaps.',
-      level: 18,
-      currentXp: 4890,
-      nextLevelXp: 5500,
-      streakDays: 24,
-      plan: 'Pro',
-      completedQuests: 62,
-      solvedDoubts: 89,
-      enrolledCourseIds: ['course-1', 'course-2'],
-      completedLessonIds: ['c1-l1', 'c1-l2', 'c2-l1'],
-      savedVideoIds: ['video-1', 'video-2'],
-      followingTeacherIds: ['teacher-1'],
-      learningHours: 36.0,
-    },
-    TEACHER_USER,
-  ];
+  // Student and Teacher are separate account types with separate login
+  // flows (see VORMIRIX_BACKEND_PLAN.md §13) — a login attempt is only
+  // accepted if the authenticated account's real role (from the database,
+  // not anything the client asserts) matches the tab the visitor picked.
+  // Picking the wrong tab for a real account signs them back out immediately
+  // rather than silently landing them in the wrong dashboard.
+  const assertRoleOrSignOut = async (user: UserProfile) => {
+    if (user.role !== roleInput) {
+      await onSignOut();
+      const actualRoleLabel = user.role === 'teacher' ? 'Teacher' : 'Student';
+      throw new Error(`This account is registered as a ${actualRoleLabel}. Please use ${actualRoleLabel} Login instead.`);
+    }
+    return user;
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const demoPersonasForRole = DEMO_PERSONAS.filter((p) => p.role === roleInput);
+
+  const handlePersonaLogin = async (email: string) => {
+    setErrorMessage('');
+    setIsSubmitting(true);
+    try {
+      const user = await onSignIn(email, DEMO_ACCOUNT_PASSWORD);
+      onLoginSuccess(await assertRoleOrSignOut(user));
+    } catch (err) {
+      setErrorMessage(describeAuthError(err));
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
 
@@ -61,34 +73,18 @@ export const AuthPage: React.FC<AuthPageProps> = ({
       return;
     }
 
-    const newUser: UserProfile = {
-      id: `user-${Date.now()}`,
-      name: nameInput || (roleInput === 'teacher' ? 'Prof. Educator' : 'Scholar Student'),
-      email: emailInput || (roleInput === 'teacher' ? 'educator@vormirex.edu' : 'student@vormirex.edu'),
-      role: roleInput,
-      avatarUrl:
-        roleInput === 'teacher'
-          ? TEACHER_USER.avatarUrl
-          : INITIAL_USER.avatarUrl,
-      bio:
-        roleInput === 'teacher'
-          ? 'Computer Science & STEM instructor on Vormirix LMS.'
-          : 'Dedicated student learning full-stack and algorithms.',
-      level: roleInput === 'teacher' ? 25 : 1,
-      currentXp: roleInput === 'teacher' ? 8500 : 150,
-      nextLevelXp: roleInput === 'teacher' ? 9000 : 500,
-      streakDays: roleInput === 'teacher' ? 30 : 1,
-      plan: 'Starter',
-      completedQuests: 0,
-      solvedDoubts: 0,
-      enrolledCourseIds: ['course-3'],
-      completedLessonIds: ['c3-l1'],
-      savedVideoIds: [],
-      followingTeacherIds: ['teacher-1'],
-      learningHours: 1.5,
-    };
-
-    onLoginSuccess(newUser);
+    setIsSubmitting(true);
+    try {
+      const user =
+        mode === 'signup'
+          ? await onSignUp(emailInput, passwordInput, nameInput, roleInput)
+          : await assertRoleOrSignOut(await onSignIn(emailInput, passwordInput));
+      onLoginSuccess(user);
+    } catch (err) {
+      setErrorMessage(describeAuthError(err));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -121,6 +117,42 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                 ? 'Sign in to access your personalized feed, courses & study stats.'
                 : 'Turn your scroll into learning. Join 50,000+ active learners.'}
             </p>
+          </div>
+
+          {/* How do you want to continue? — Student and Teacher are
+              separate account types with separate login flows; picking the
+              wrong one here is caught server-side (see assertRoleOrSignOut
+              above), this is just the UI entry point for choosing which. */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-bold text-[#bacac6]">
+              {mode === 'login' ? 'How do you want to continue?' : 'I want to join as a:'}
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setRoleInput('student')}
+                className={`py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer ${
+                  roleInput === 'student'
+                    ? 'bg-[#58f5e0]/20 border-[#58f5e0] text-[#58f5e0]'
+                    : 'bg-[#111319] border-[#272a30] text-[#bacac6]'
+                }`}
+              >
+                <GraduationCap className="w-4 h-4" />
+                <span>{mode === 'login' ? 'Student Login' : 'Student'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setRoleInput('teacher')}
+                className={`py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer ${
+                  roleInput === 'teacher'
+                    ? 'bg-[#ccbdff]/20 border-[#ccbdff] text-[#ccbdff]'
+                    : 'bg-[#111319] border-[#272a30] text-[#bacac6]'
+                }`}
+              >
+                <UserCheck className="w-4 h-4" />
+                <span>{mode === 'login' ? 'Teacher Login' : 'Teacher'}</span>
+              </button>
+            </div>
           </div>
 
           {/* Mode Switcher Tabs */}
@@ -166,12 +198,13 @@ export const AuthPage: React.FC<AuthPageProps> = ({
             </div>
 
             <div className="grid grid-cols-1 gap-2">
-              {personas.map((p) => (
+              {demoPersonasForRole.map((p) => (
                 <button
-                  key={p.name}
+                  key={p.email}
                   type="button"
-                  onClick={() => onLoginSuccess(p)}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-[#111319] hover:bg-[#161922] border border-[#272a30] hover:border-[#58f5e0] transition-all text-left group cursor-pointer"
+                  disabled={isSubmitting}
+                  onClick={() => handlePersonaLogin(p.email)}
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-[#111319] hover:bg-[#161922] border border-[#272a30] hover:border-[#58f5e0] transition-all text-left group cursor-pointer disabled:opacity-50"
                 >
                   <div className="flex items-center gap-2.5">
                     <img
@@ -184,7 +217,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                         {p.name}
                       </h4>
                       <p className="text-[10px] text-[#bacac6]">
-                        {p.role === 'teacher' ? '👨‍🏫 Verified Educator' : `🎓 Student • Level ${p.level}`}
+                        {p.role === 'teacher' ? '👨‍🏫 Verified Educator' : '🎓 Student Scholar'}
                       </p>
                     </div>
                   </div>
@@ -194,6 +227,10 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                 </button>
               ))}
             </div>
+            <p className="text-[10px] text-[#bacac6]/70 leading-relaxed">
+              These sign in with real seeded demo accounts (run <code className="text-[#58f5e0]">npm run seed</code> once
+              against your Supabase project) — not fabricated sessions.
+            </p>
           </div>
 
           {/* Divider */}
@@ -210,39 +247,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({
             {errorMessage && (
               <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium text-center">
                 {errorMessage}
-              </div>
-            )}
-
-            {/* Role selection for signup */}
-            {mode === 'signup' && (
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[#bacac6]">I want to join as a:</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setRoleInput('student')}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer ${
-                      roleInput === 'student'
-                        ? 'bg-[#58f5e0]/20 border-[#58f5e0] text-[#58f5e0]'
-                        : 'bg-[#111319] border-[#272a30] text-[#bacac6]'
-                    }`}
-                  >
-                    <GraduationCap className="w-4 h-4" />
-                    <span>Student</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRoleInput('teacher')}
-                    className={`py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer ${
-                      roleInput === 'teacher'
-                        ? 'bg-[#ccbdff]/20 border-[#ccbdff] text-[#ccbdff]'
-                        : 'bg-[#111319] border-[#272a30] text-[#bacac6]'
-                    }`}
-                  >
-                    <UserCheck className="w-4 h-4" />
-                    <span>Teacher</span>
-                  </button>
-                </div>
               </div>
             )}
 
@@ -319,9 +323,14 @@ export const AuthPage: React.FC<AuthPageProps> = ({
 
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-[#2dd8c4] hover:bg-[#58f5e0] text-[#005a50] text-xs font-extrabold uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(45,216,196,0.3)] hover:scale-95 cursor-pointer mt-2"
+              disabled={isSubmitting}
+              className="w-full py-3 rounded-xl bg-[#2dd8c4] hover:bg-[#58f5e0] text-[#005a50] text-xs font-extrabold uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(45,216,196,0.3)] hover:scale-95 cursor-pointer mt-2 disabled:opacity-50 disabled:hover:scale-100"
             >
-              {mode === 'login' ? 'Sign In to Vormirix' : 'Create Vormirix Account'}
+              {isSubmitting
+                ? 'Please wait...'
+                : mode === 'login'
+                ? `Sign In as ${roleInput === 'teacher' ? 'Teacher' : 'Student'}`
+                : 'Create Vormirix Account'}
             </button>
           </form>
         </div>

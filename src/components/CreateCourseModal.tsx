@@ -9,7 +9,8 @@ import {
   X,
 } from 'lucide-react';
 import React, { useState } from 'react';
-import { Course, Lesson, UserProfile } from '../types';
+import { courseService } from '../services/courseService';
+import { Course, UserProfile } from '../types';
 
 interface CreateCourseModalProps {
   isOpen: boolean;
@@ -35,6 +36,9 @@ export const CreateCourseModal: React.FC<CreateCourseModalProps> = ({
   const [thumbnailUrl, setThumbnailUrl] = useState(
     'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80'
   );
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const [lessons, setLessons] = useState<
     Array<{ title: string; duration: string; videoUrl: string; isFreePreview: boolean; description: string }>
@@ -75,56 +79,38 @@ export const CreateCourseModal: React.FC<CreateCourseModalProps> = ({
     setLessons((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const courseId = `course-${Date.now()}`;
+    setSubmitError('');
+    setIsSubmitting(true);
 
-    const formattedLessons: Lesson[] = lessons.map((l, idx) => ({
-      id: `${courseId}-l${idx + 1}`,
-      courseId,
-      title: l.title,
-      duration: l.duration,
-      videoUrl: l.videoUrl,
-      description: l.description,
-      isFreePreview: l.isFreePreview,
-      order: idx + 1,
-      xpReward: 30 + idx * 10,
-    }));
+    try {
+      const created = await courseService.createCourse(user.id, {
+        title,
+        subtitle,
+        description,
+        category,
+        difficulty,
+        price: Number(price),
+        isFree,
+        language,
+        thumbnailUrl,
+        lessons: lessons.map((l) => ({
+          title: l.title,
+          description: l.description,
+          videoUrl: l.videoUrl,
+          isFreePreview: l.isFreePreview,
+        })),
+        publish: true,
+      });
 
-    const newCourse: Course = {
-      id: courseId,
-      title,
-      subtitle,
-      description,
-      thumbnailUrl,
-      category,
-      difficulty,
-      teacherId: user.id,
-      teacherName: user.name,
-      teacherAvatar: user.avatarUrl,
-      teacherRole: user.role === 'teacher' ? 'Masterclass Instructor' : 'Educator',
-      teacherBio: user.bio || 'Experienced educator on Vormirix LMS.',
-      rating: 5.0,
-      reviewCount: 1,
-      enrolledCount: 1,
-      price: isFree ? 0 : Number(price),
-      isFree,
-      language,
-      estimatedDuration: `${lessons.length * 20} mins • ${lessons.length} Lessons`,
-      whatYouWillLearn: [
-        'Master the fundamental concepts with real-world projects',
-        'Learn problem-solving and industry techniques',
-        'Prepare for technical interviews and competitive milestones',
-      ],
-      prerequisites: ['Basic enthusiasm to learn'],
-      lessons: formattedLessons,
-      certificateAvailable: true,
-      isPublished: true,
-      createdAt: 'Just now',
-    };
-
-    onCreateSuccess(newCourse);
-    onClose();
+      onCreateSuccess(created);
+      onClose();
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Failed to create course. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -357,6 +343,11 @@ export const CreateCourseModal: React.FC<CreateCourseModalProps> = ({
           </div>
 
           {/* Submit CTA */}
+          {submitError && (
+            <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium text-center">
+              {submitError}
+            </div>
+          )}
           <div className="pt-4 border-t border-[#272a30] flex justify-end gap-3">
             <button
               type="button"
@@ -367,9 +358,10 @@ export const CreateCourseModal: React.FC<CreateCourseModalProps> = ({
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 bg-[#2dd8c4] text-[#005a50] rounded-xl font-bold text-xs uppercase hover:scale-95 transition-transform shadow-[0_0_15px_rgba(45,216,196,0.3)] cursor-pointer"
+              disabled={isSubmitting}
+              className="px-6 py-2.5 bg-[#2dd8c4] text-[#005a50] rounded-xl font-bold text-xs uppercase hover:scale-95 transition-transform shadow-[0_0_15px_rgba(45,216,196,0.3)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              Publish Masterclass Course
+              {isSubmitting ? 'Publishing...' : 'Publish Masterclass Course'}
             </button>
           </div>
         </form>

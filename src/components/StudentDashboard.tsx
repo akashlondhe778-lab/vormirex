@@ -25,12 +25,16 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { MOCK_ACHIEVEMENTS, MOCK_XP_ACTIVITIES } from '../data/edtechData';
-import { Course, UserProfile } from '../types';
+import { Achievement, Course, UserProfile, XPActivity } from '../types';
 
 interface StudentDashboardProps {
   user: UserProfile;
   courses: Course[];
+
+  weeklyXp: XPActivity[];
+
+  achievements: Achievement[];
+
   onNavigateToCourse: (courseId: string) => void;
   onOpenPlayer: (course: Course) => void;
   onOpenStudio: (tab?: string) => void;
@@ -41,6 +45,10 @@ interface StudentDashboardProps {
 export const StudentDashboard: React.FC<StudentDashboardProps> = ({
   user,
   courses,
+  weeklyXp,
+
+  achievements,
+
   onNavigateToCourse,
   onOpenPlayer,
   onOpenStudio,
@@ -165,14 +173,14 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
               <p className="text-xs text-[#bacac6]">Track your daily learning consistency & performance</p>
             </div>
             <span className="text-xs font-mono bg-[#111319] text-[#58f5e0] px-2.5 py-1 rounded-lg border border-[#3b4a47]">
-              +3,150 XP Weekly
+              +{weeklyXp.reduce((sum, d) => sum + d.xp, 0).toLocaleString()} XP Weekly
             </span>
           </div>
 
           {/* Recharts Component */}
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={MOCK_XP_ACTIVITIES}>
+              <AreaChart data={weeklyXp}>
                 <defs>
                   <linearGradient id="colorXp" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#58f5e0" stopOpacity={0.4} />
@@ -380,12 +388,12 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({
             onClick={onOpenProfile}
             className="text-xs font-bold text-[#58f5e0] hover:underline cursor-pointer"
           >
-            View All Badges ({MOCK_ACHIEVEMENTS.length})
+            View All Badges ({achievements.length})
           </button>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          {MOCK_ACHIEVEMENTS.slice(0, 6).map((ach) => (
+          {achievements.slice(0, 6).map((ach) => (
             <div
               key={ach.id}
               className={`p-3 rounded-2xl border text-center flex flex-col items-center justify-between gap-2 ${

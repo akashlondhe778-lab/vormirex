@@ -42,6 +42,17 @@ export const TEACHER_USER: UserProfile = {
   learningHours: 85.0,
 };
 
+// Real seeded Supabase Auth demo accounts (see scripts/seed-demo-data.ts).
+// The "1-click persona" login buttons in AuthPage/AuthModal sign in with
+// these real credentials via authService.signIn — they no longer fabricate
+// a client-side session object the way the old mock-data version did.
+export const DEMO_ACCOUNT_PASSWORD = 'Vormirix-Demo-2026';
+
+export const DEMO_PERSONAS: Array<{ name: string; email: string; role: 'student' | 'teacher'; avatarUrl: string }> = [
+  { name: INITIAL_USER.name, email: INITIAL_USER.email, role: 'student', avatarUrl: INITIAL_USER.avatarUrl },
+  { name: TEACHER_USER.name, email: TEACHER_USER.email, role: 'teacher', avatarUrl: TEACHER_USER.avatarUrl },
+];
+
 export const TESTIMONIALS: Testimonial[] = [
   {
     name: 'Rahul Sharma',

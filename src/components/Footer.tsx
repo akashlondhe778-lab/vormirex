@@ -51,7 +51,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenPrivacy, onOpenTerms }) =>
           <a href="#pricing" className="text-[#bacac6] hover:text-[#58f5e0] transition-colors">
             Pricing
           </a>
-          <a href="#roadmap" className="text-[#bacac6] hover:text-[#58f5e0] transition-colors">
+          <a href="#how-it-works" className="text-[#bacac6] hover:text-[#58f5e0] transition-colors">
             Roadmap
           </a>
           <a href="#demo" className="text-[#bacac6] hover:text-[#58f5e0] transition-colors">

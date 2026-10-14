@@ -73,6 +73,10 @@ export interface UserProfile {
   role: 'student' | 'teacher';
   avatarUrl: string;
   bio?: string;
+  username?: string;
+  location?: string;
+  educationLevel?: string;
+  interests?: string[];
   level: number;
   currentXp: number;
   nextLevelXp: number;
@@ -206,6 +210,121 @@ export interface Testimonial {
   avatarUrl: string;
   rating: number;
   isFeatured?: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 1 Social / Community
+// ---------------------------------------------------------------------------
+
+export interface StudentPublicProfile {
+  id: string;
+  name: string;
+  username: string | null;
+  avatarUrl: string;
+  bio?: string;
+  location?: string;
+  educationLevel?: string;
+  interests: string[];
+  role: 'student' | 'teacher';
+  level: number;
+  currentXp: number;
+  streakDays: number;
+  followersCount: number;
+  followingCount: number;
+  postsCount: number;
+  questionsAskedCount: number;
+  answersGivenCount: number;
+  acceptedAnswersCount: number;
+  isFollowedByMe: boolean;
+  isOwnProfile: boolean;
+}
+
+export interface CommunityPost {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar: string;
+  authorUsername: string | null;
+  type: 'text' | 'image' | 'video' | 'achievement';
+  content: string;
+  imageUrl?: string;
+  videoUrl?: string;
+  certificate?: CourseCertificate;
+  tags: string[];
+  likesCount: number;
+  commentsCount: number;
+  savesCount: number;
+  isLiked: boolean;
+  isSaved: boolean;
+  createdAt: string;
+}
+
+export interface CourseCertificate {
+  id: string;
+  verificationCode: string;
+  studentId: string;
+  courseId: string;
+  courseTitle: string;
+  score?: number;
+  issuedAt: string;
+}
+
+export interface StudentProject {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar: string;
+  title: string;
+  description?: string;
+  technologies: string[];
+  imageUrl?: string;
+  demoUrl?: string;
+  githubUrl?: string;
+  whatILearned?: string;
+  createdAt: string;
+}
+
+export interface PostComment {
+  id: string;
+  postId: string;
+  userId: string;
+  userName: string;
+  userAvatar: string;
+  comment: string;
+  parentCommentId?: string;
+  createdAt: string;
+}
+
+export interface Question {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar: string;
+  title: string;
+  description?: string;
+  subject?: string;
+  topic?: string;
+  imageUrl?: string;
+  tags: string[];
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+  answersCount: number;
+  viewsCount: number;
+  isResolved: boolean;
+  acceptedAnswerId?: string;
+  createdAt: string;
+}
+
+export interface QuestionAnswer {
+  id: string;
+  questionId: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar: string;
+  content: string;
+  upvotesCount: number;
+  isAccepted: boolean;
+  isUpvotedByMe: boolean;
+  createdAt: string;
 }
 
 export interface PricingPlan {

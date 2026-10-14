@@ -25,28 +25,22 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
   const [cvv, setCvv] = useState('');
   const [bank, setBank] = useState('HDFC Bank');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
   const [paymentSuccessData, setPaymentSuccessData] = useState<{ paymentId: string; orderId: string } | null>(null);
 
   if (!isOpen || !course) return null;
 
   const handlePay = async (e: React.FormEvent) => {
     e.preventDefault();
+    setPaymentError('');
     setIsProcessing(true);
 
     try {
-      // 1. Create order
-      const order = await paymentService.createOrder({
-        courseId: course.id,
-        courseTitle: course.title,
-        amount: course.price,
-        studentName: user.name,
-        studentEmail: user.email || 'student@vormirex.edu',
-      });
+      // 1. Create a pending order (server-side; cannot grant access by itself)
+      const order = await paymentService.createOrder(course.id);
 
-      // 2. Simulate processing delay
-      await new Promise((resolve) => setTimeout(resolve, 1400));
-
-      // 3. Verify payment
+      // 2. Verify via the verify-payment Edge Function, which is the only
+      // code path allowed to mark the order paid and activate enrollment.
       const result = await paymentService.verifyPayment(order.id, method);
 
       if (result.success) {
@@ -60,9 +54,13 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
           setIsProcessing(false);
           onClose();
         }, 1800);
+      } else {
+        setPaymentError(result.error || 'Payment could not be verified. Please try again.');
+        setIsProcessing(false);
       }
     } catch (err) {
       console.error(err);
+      setPaymentError(err instanceof Error ? err.message : 'Payment failed. Please try again.');
       setIsProcessing(false);
     }
   };
@@ -282,6 +280,12 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                   <span className="text-[#58f5e0]">₹{course.price}</span>
                 </div>
               </div>
+
+              {paymentError && (
+                <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium text-center">
+                  {paymentError}
+                </div>
+              )}
 
               {/* Submit Button */}
               <button

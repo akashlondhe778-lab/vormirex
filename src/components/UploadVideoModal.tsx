@@ -8,6 +8,7 @@ import {
   X,
 } from 'lucide-react';
 import React, { useState } from 'react';
+import { videoService } from '../services/videoService';
 import { Course, ShortVideo, UserProfile } from '../types';
 
 interface UploadVideoModalProps {
@@ -39,49 +40,35 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
     'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4'
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError('');
     setIsSubmitting(true);
 
-    const relatedCourse = courses.find((c) => c.id === relatedCourseId);
+    try {
+      const created = await videoService.createVideo(user.id, {
+        title,
+        caption,
+        description,
+        videoUrl: selectedSampleVideo,
+        thumbnailUrl,
+        category,
+        difficulty,
+        tags: tagsInput.split(',').map((t) => t.trim()).filter(Boolean),
+        relatedCourseId: relatedCourseId || undefined,
+      });
 
-    const newVideo: ShortVideo = {
-      id: `vid-${Date.now()}`,
-      title,
-      caption,
-      description,
-      videoUrl: selectedSampleVideo,
-      thumbnailUrl,
-      duration: '0:50',
-      category,
-      difficulty,
-      tags: tagsInput.split(',').map((t) => t.trim()).filter(Boolean),
-      teacherId: user.id,
-      teacherName: user.name,
-      teacherAvatar: user.avatarUrl,
-      teacherRole: user.role === 'teacher' ? 'Course Instructor' : 'Student Creator',
-      likesCount: 0,
-      commentsCount: 0,
-      viewsCount: 1,
-      sharesCount: 0,
-      savesCount: 0,
-      relatedCourseId: relatedCourse?.id,
-      relatedCourseTitle: relatedCourse?.title,
-      relatedCoursePrice: relatedCourse?.price,
-      createdAt: 'Just now',
-      isLiked: false,
-      isSaved: false,
-      comments: [],
-    };
-
-    setTimeout(() => {
-      onUploadSuccess(newVideo);
-      setIsSubmitting(false);
+      onUploadSuccess(created);
       onClose();
-    }, 600);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Failed to upload video. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -237,6 +224,11 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
           </div>
 
           {/* Submit CTA */}
+          {submitError && (
+            <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium text-center">
+              {submitError}
+            </div>
+          )}
           <div className="pt-4 border-t border-[#272a30] flex justify-end gap-3">
             <button
               type="button"

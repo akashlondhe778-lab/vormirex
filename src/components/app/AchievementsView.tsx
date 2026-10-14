@@ -12,18 +12,20 @@ import {
   Zap,
 } from 'lucide-react';
 import React from 'react';
-import { MOCK_ACHIEVEMENTS } from '../../data/edtechData';
-import { Course, UserProfile } from '../../types';
+import { Achievement, Course, UserProfile } from '../../types';
 
 interface AchievementsViewProps {
   user: UserProfile;
   courses: Course[];
+  /** Real unlock status from student_achievements (src/hooks/useAchievements.ts). */
+  achievements: Achievement[];
   onNavigate: (route: string) => void;
 }
 
 export const AchievementsView: React.FC<AchievementsViewProps> = ({
   user,
   courses,
+  achievements,
   onNavigate,
 }) => {
   const completedCourses = courses.filter(
@@ -107,7 +109,7 @@ export const AchievementsView: React.FC<AchievementsViewProps> = ({
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {MOCK_ACHIEVEMENTS.map((badge) => (
+          {achievements.map((badge) => (
             <div
               key={badge.id}
               className={`p-5 rounded-2xl border transition-all ${
