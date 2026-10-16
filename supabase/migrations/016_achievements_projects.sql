@@ -1,5 +1,5 @@
 -- 016_achievements_projects.sql
--- Phase 1b: official Vormirex-issued course certificates (distinct from the
+-- Phase 1b: official Vormirix-issued course certificates (distinct from the
 -- existing rule-based `achievements` badge system — see the comment block
 -- below for why these are two different concepts), a student project
 -- showcase, username claiming, and video as a post type.

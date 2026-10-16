@@ -667,7 +667,7 @@ export const StudioModal: React.FC<StudioModalProps> = ({
                         Step-by-Step Resolution
                       </h4>
                       <span className="text-xs font-bold text-[#bacac6] bg-[#111319] px-2.5 py-1 rounded-full border border-[#3b4a47]">
-                        Verified by Vormirex Engine
+                        Verified by Vormirix Engine
                       </span>
                     </div>
 

@@ -276,7 +276,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                   required
                   value={emailInput}
                   onChange={(e) => setEmailInput(e.target.value)}
-                  placeholder="scholar@vormirex.edu"
+                  placeholder="scholar@vormirix.edu"
                   className="w-full bg-[#111319] border border-[#272a30] focus:border-[#58f5e0] rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder:text-[#bacac6]/50 outline-none"
                 />
               </div>
