@@ -140,7 +140,7 @@ export const AppTopBar: React.FC<AppTopBarProps> = ({
               </div>
 
               {/* Student and Teacher are separate account types (see
-                  VORMIRIX_BACKEND_PLAN.md §13) — this menu shows only the
+                  VORMIREX_BACKEND_PLAN.md §13) — this menu shows only the
                   options for the signed-in account's own role, with no way
                   to switch to the other role from inside the app. */}
               <div className="py-1 space-y-1">

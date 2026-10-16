@@ -3,7 +3,7 @@ import { Badge, PricingPlan, QuizQuestion, RoadmapNode, SubjectModule, Testimoni
 export const INITIAL_USER: UserProfile = {
   id: 'student-1',
   name: 'Rahul Sharma',
-  email: 'rahul.sharma@vormirix.edu',
+  email: 'rahul.sharma@vormirex.edu',
   role: 'student',
   avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuChUQ6_d0Cx-F06E0vZZTAbjWtd3dcQxnj3VIXDPkdABMn6ePoVHG7OLjUbCTaQPa0hY3J31_pujpm5wt_Iyc4bLMkp5rtIe-ynGPy3uqo0mwffW9ffoZmGgHPMGg1eQmLE4Zl4poIQa9ACPcn6FYtL2d-MSDQw0_oxItm6IzGmDceatfFe4cMmJWmwBEihr0q543-B0uWrgXQzwNCYTiyUdnyzaZ1MP7v0sJ7KR05konsJYexhUVIa',
   bio: 'Passionate CS undergrad preparing for technical interviews & competitive coding. Building full-stack apps.',
@@ -24,7 +24,7 @@ export const INITIAL_USER: UserProfile = {
 export const TEACHER_USER: UserProfile = {
   id: 'teacher-1',
   name: 'Dr. Vikram Desai',
-  email: 'vikram.desai@vormirix.edu',
+  email: 'vikram.desai@vormirex.edu',
   role: 'teacher',
   avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCRMabCrhzYGEAPunNCKP3lTLsPY7edkb3ZSxv702tLa-yBlTRiS75Rku5ucYEuKcz1t9WFfGCtMHTVdvmHwUcLdMWCX8wRF1sHnD8excTSo9DNbsouO2EFeZ3pAgaTaQ64ufcSyB2TL7dHapPleutt_ole7e6a2O31mOTX_GLCbT27WdFvM3ox9SQssKTB2H-Q5gibtm3q-lyv-ferMIzR9Nkl3NyP1DBOdVO8LfAx_sQGJRbjuyuc',
   bio: 'Lead Architect & Mathematics Educator. Creator of 4 top-selling courses with over 35,000+ enrolled students.',
@@ -57,7 +57,7 @@ export const TESTIMONIALS: Testimonial[] = [
   {
     name: 'Rahul Sharma',
     role: 'Engineering Student',
-    quote: '"I used to dread studying physics, but the way Vormirix breaks down complex mechanics into interactive chats feels like I\'m just messaging a really smart friend. My grades jumped by 20% in one semester."',
+    quote: '"I used to dread studying physics, but the way Vormirex breaks down complex mechanics into interactive chats feels like I\'m just messaging a really smart friend. My grades jumped by 20% in one semester."',
     avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuChUQ6_d0Cx-F06E0vZZTAbjWtd3dcQxnj3VIXDPkdABMn6ePoVHG7OLjUbCTaQPa0hY3J31_pujpm5wt_Iyc4bLMkp5rtIe-ynGPy3uqo0mwffW9ffoZmGgHPMGg1eQmLE4Zl4poIQa9ACPcn6FYtL2d-MSDQw0_oxItm6IzGmDceatfFe4cMmJWmwBEihr0q543-B0uWrgXQzwNCYTiyUdnyzaZ1MP7v0sJ7KR05konsJYexhUVIa',
     rating: 5,
   },
@@ -72,7 +72,7 @@ export const TESTIMONIALS: Testimonial[] = [
   {
     name: 'Vikram Desai',
     role: 'Mathematics Educator',
-    quote: '"As a tutor myself, I use Vormirix to supplement my lessons. The adaptive quizzes are brilliant at finding exactly where a student is struggling. It\'s the best educational tool I\'ve seen in years."',
+    quote: '"As a tutor myself, I use Vormirex to supplement my lessons. The adaptive quizzes are brilliant at finding exactly where a student is struggling. It\'s the best educational tool I\'ve seen in years."',
     avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCRMabCrhzYGEAPunNCKP3lTLsPY7edkb3ZSxv702tLa-yBlTRiS75Rku5ucYEuKcz1t9WFfGCtMHTVdvmHwUcLdMWCX8wRF1sHnD8excTSo9DNbsouO2EFeZ3pAgaTaQ64ufcSyB2TL7dHapPleutt_ole7e6a2O31mOTX_GLCbT27WdFvM3ox9SQssKTB2H-Q5gibtm3q-lyv-ferMIzR9Nkl3NyP1DBOdVO8LfAx_sQGJRbjuyuc',
     rating: 4.5,
   },
@@ -288,7 +288,7 @@ export const BADGES: Badge[] = [
   {
     id: 'b6',
     name: 'Quantum Overlord',
-    description: 'Reach Level 20 in Vormirix AI Learning Arena',
+    description: 'Reach Level 20 in Vormirex AI Learning Arena',
     icon: 'military_tech',
     rarity: 'Legendary',
     isUnlocked: false,

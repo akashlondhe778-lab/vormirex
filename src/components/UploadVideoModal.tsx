@@ -89,7 +89,7 @@ export const UploadVideoModal: React.FC<UploadVideoModalProps> = ({
           <div>
             <h2 className="text-xl font-bold text-white">Upload Educational Short Video</h2>
             <p className="text-xs text-[#bacac6]">
-              Publish 30s-60s micro-lessons that appear instantly on the Vormirix Reels Feed.
+              Publish 30s-60s micro-lessons that appear instantly on the Vormirex Reels Feed.
             </p>
           </div>
         </div>

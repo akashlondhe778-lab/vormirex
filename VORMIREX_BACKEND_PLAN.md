@@ -1,4 +1,4 @@
-# Vormirix Backend + Supabase Integration Plan
+# Vormirex Backend + Supabase Integration Plan
 
 Status: **PLANNING ONLY — no backend code has been written yet.** This document is the
 output of Phase 1 (audit) and Phase 2 (plan) as requested. Implementation begins only
@@ -483,7 +483,7 @@ backend is being built and tested.
 - If the demo account hasn't been seeded yet, it fails closed (console
   warning, stays logged out) rather than crashing — the existing Login page
   still works normally for a manual/real sign-in in that case.
-- `App.tsx` shows a brief "Loading Vormirix..." state (existing color
+- `App.tsx` shows a brief "Loading Vormirex..." state (existing color
   tokens only, no new design) while this resolves, so a direct link to an
   `/app/*` route doesn't flash the public marketing page first.
 

@@ -1,6 +1,6 @@
 import { ArrowRight, Sparkles, Zap } from 'lucide-react';
 import React from 'react';
-import { VormirixLogo } from '../VormirixLogo';
+import { VormirexLogo } from '../VormirexLogo';
 
 interface PublicFinalCTAProps {
   onStartLearning: () => void;
@@ -15,7 +15,7 @@ export const PublicFinalCTA: React.FC<PublicFinalCTAProps> = ({ onStartLearning 
 
         <div className="relative z-10 max-w-3xl mx-auto space-y-6">
           <div className="w-14 h-14 rounded-2xl bg-[#111319] border border-[#3b4a47] flex items-center justify-center mx-auto shadow-[0_0_30px_rgba(88,245,224,0.3)]">
-            <VormirixLogo size={32} variant="gradient" withGlow />
+            <VormirexLogo size={32} variant="gradient" withGlow />
           </div>
 
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#58f5e0]/30 bg-[#58f5e0]/10">

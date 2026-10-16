@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { DEMO_ACCOUNT_PASSWORD, DEMO_PERSONAS } from '../../data/mockData';
 import { UserProfile } from '../../types';
 import { describeAuthError } from '../../utils/authErrors';
-import { VormirixLogo } from '../VormirixLogo';
+import { VormirexLogo } from '../VormirexLogo';
 
 interface AuthPageProps {
   initialMode: 'login' | 'signup';
@@ -35,7 +35,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Student and Teacher are separate account types with separate login
-  // flows (see VORMIRIX_BACKEND_PLAN.md §13) — a login attempt is only
+  // flows (see VORMIREX_BACKEND_PLAN.md §13) — a login attempt is only
   // accepted if the authenticated account's real role (from the database,
   // not anything the client asserts) matches the tab the visitor picked.
   // Picking the wrong tab for a real account signs them back out immediately
@@ -99,7 +99,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
           className="inline-flex items-center gap-2 text-xs font-semibold text-[#bacac6] hover:text-[#58f5e0] transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Vormirix Home</span>
+          <span>Back to Vormirex Home</span>
         </button>
 
         {/* Card */}
@@ -107,10 +107,10 @@ export const AuthPage: React.FC<AuthPageProps> = ({
           {/* Header */}
           <div className="text-center space-y-3">
             <div className="w-14 h-14 rounded-2xl bg-[#111319] border border-[#3b4a47] flex items-center justify-center mx-auto shadow-[0_0_25px_rgba(88,245,224,0.25)]">
-              <VormirixLogo size={32} variant="gradient" withGlow />
+              <VormirexLogo size={32} variant="gradient" withGlow />
             </div>
             <h2 className="text-2xl font-extrabold text-white tracking-tight">
-              {mode === 'login' ? 'Welcome Back to Vormirix' : 'Create Your Account'}
+              {mode === 'login' ? 'Welcome Back to Vormirex' : 'Create Your Account'}
             </h2>
             <p className="text-xs text-[#bacac6]">
               {mode === 'login'
@@ -276,7 +276,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                   required
                   value={emailInput}
                   onChange={(e) => setEmailInput(e.target.value)}
-                  placeholder="scholar@vormirix.edu"
+                  placeholder="scholar@vormirex.edu"
                   className="w-full bg-[#111319] border border-[#272a30] focus:border-[#58f5e0] rounded-xl pl-9 pr-4 py-2.5 text-xs text-white placeholder:text-[#bacac6]/50 outline-none"
                 />
               </div>
@@ -330,7 +330,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                 ? 'Please wait...'
                 : mode === 'login'
                 ? `Sign In as ${roleInput === 'teacher' ? 'Teacher' : 'Student'}`
-                : 'Create Vormirix Account'}
+                : 'Create Vormirex Account'}
             </button>
           </form>
         </div>

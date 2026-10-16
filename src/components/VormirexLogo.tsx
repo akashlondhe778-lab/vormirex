@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface VormirixLogoProps {
+interface VormirexLogoProps {
   className?: string;
   size?: number | string;
   variant?: 'cyan' | 'gradient' | 'white' | 'dark' | 'current';
@@ -12,7 +12,7 @@ interface VormirixLogoProps {
 // couldn't be recolored/masked reliably. public/logo-white.png has been
 // reprocessed once (luminance -> alpha, glyph filled pure white) into a
 // real transparent PNG, so it can just be drawn directly.
-export const VormirixLogo: React.FC<VormirixLogoProps> = ({ className = '', size = 32, withGlow = false }) => {
+export const VormirexLogo: React.FC<VormirexLogoProps> = ({ className = '', size = 32, withGlow = false }) => {
   return (
     <div
       className={`relative inline-flex items-center justify-center shrink-0 ${className}`}
@@ -20,7 +20,7 @@ export const VormirixLogo: React.FC<VormirixLogoProps> = ({ className = '', size
     >
       <img
         src="/logo-white.png"
-        alt="Vormirix"
+        alt="Vormirex"
         className="w-full h-full object-contain transition-transform duration-300"
         style={{ filter: withGlow ? 'drop-shadow(0 0 6px rgba(88,245,224,0.6))' : undefined }}
       />
@@ -28,4 +28,4 @@ export const VormirixLogo: React.FC<VormirixLogoProps> = ({ className = '', size
   );
 };
 
-export default VormirixLogo;
+export default VormirexLogo;

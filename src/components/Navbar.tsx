@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import React, { useState } from 'react';
 import { UserProfile } from '../types';
-import { VormirixLogo } from './VormirixLogo';
+import { VormirexLogo } from './VormirexLogo';
 
 interface NavbarProps {
   user: UserProfile | null;
@@ -67,11 +67,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="flex items-center gap-3 text-left group cursor-pointer"
           >
             <div className="w-9 h-9 rounded-xl bg-[#191c21] border border-[#3b4a47] flex items-center justify-center shadow-[0_0_15px_rgba(88,245,224,0.2)] group-hover:border-[#58f5e0] group-hover:shadow-[0_0_20px_rgba(88,245,224,0.35)] transition-all">
-              <VormirixLogo size={22} variant="gradient" withGlow />
+              <VormirexLogo size={22} variant="gradient" withGlow />
             </div>
             <div>
               <span className="font-['Manrope'] font-black text-lg tracking-wider text-white flex items-center gap-1">
-                VORMIRIX
+                VORMIREX
                 <span className="w-1.5 h-1.5 rounded-full bg-[#58f5e0] inline-block animate-pulse" />
               </span>
               <span className="text-[10px] text-[#bacac6] tracking-widest block uppercase font-mono -mt-0.5">

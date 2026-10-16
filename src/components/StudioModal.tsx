@@ -36,7 +36,7 @@ import {
 import React, { useState } from 'react';
 import { BADGES, ROADMAP_NODES, SAMPLE_DOUBTS, SAMPLE_QUIZZES, SUBJECTS } from '../data/mockData';
 import { Badge, Message, QuizQuestion, SubjectModule, UserProfile } from '../types';
-import { VormirixLogo } from './VormirixLogo';
+import { VormirexLogo } from './VormirexLogo';
 
 interface StudioModalProps {
   isOpen: boolean;
@@ -240,12 +240,12 @@ export const StudioModal: React.FC<StudioModalProps> = ({
         <div className="h-16 border-b border-[#272a30] bg-[#191c21] px-6 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-[#111319] border border-[#3b4a47] flex items-center justify-center shadow-[0_0_15px_rgba(88,245,224,0.2)]">
-              <VormirixLogo size={20} variant="gradient" withGlow />
+              <VormirexLogo size={20} variant="gradient" withGlow />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-['Manrope'] font-extrabold text-lg text-[#e1e2ea]">
-                  Vormirix Studio
+                  Vormirex Studio
                 </span>
                 <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-[#2dd8c4]/20 text-[#58f5e0] border border-[#2dd8c4]/40 rounded-full">
                   Interactive App Mode
@@ -667,7 +667,7 @@ export const StudioModal: React.FC<StudioModalProps> = ({
                         Step-by-Step Resolution
                       </h4>
                       <span className="text-xs font-bold text-[#bacac6] bg-[#111319] px-2.5 py-1 rounded-full border border-[#3b4a47]">
-                        Verified by Vormirix Engine
+                        Verified by Vormirex Engine
                       </span>
                     </div>
 

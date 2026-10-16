@@ -287,7 +287,7 @@ export const StudentProfilePage: React.FC<StudentProfilePageProps> = ({ profileI
           <div className="space-y-6">
             {certificates.length > 0 && (
               <div className="space-y-3">
-                <h3 className="text-xs uppercase font-bold text-[#f59e0b] tracking-wider">Official Vormirix Certificates</h3>
+                <h3 className="text-xs uppercase font-bold text-[#f59e0b] tracking-wider">Official Vormirex Certificates</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {certificates.map((cert) => (
                     <AchievementCertificateCard key={cert.id} certificate={cert} studentName={profile.name} compact />

@@ -1,6 +1,6 @@
 -- ===== migrations/001_extensions_and_enums.sql =====
 -- 001_extensions_and_enums.sql
--- Core extensions and shared enum types used across the Vormirix schema.
+-- Core extensions and shared enum types used across the Vormirex schema.
 
 create extension if not exists "pgcrypto";
 

@@ -25,7 +25,7 @@ export const ForTeachersSection: React.FC<ForTeachersSectionProps> = ({ onStartT
     {
       icon: Users,
       title: 'Reach Thousands of Students',
-      desc: 'Get organic algorithmic distribution through Vormirix educational reels and smart subject recommendations.',
+      desc: 'Get organic algorithmic distribution through Vormirex educational reels and smart subject recommendations.',
     },
     {
       icon: BarChart3,
@@ -82,7 +82,7 @@ export const ForTeachersSection: React.FC<ForTeachersSectionProps> = ({ onStartT
           {/* Callout & CTA */}
           <div className="bg-[#111319] border border-[#272a30] rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
             <div>
-              <h4 className="text-lg font-bold text-white">Join 1,200+ Educators on Vormirix</h4>
+              <h4 className="text-lg font-bold text-white">Join 1,200+ Educators on Vormirex</h4>
               <p className="text-xs sm:text-sm text-[#bacac6] mt-1">
                 Zero platform hosting fees. Direct 85% creator revenue share. Full copyright ownership.
               </p>

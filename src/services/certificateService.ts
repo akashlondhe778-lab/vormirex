@@ -4,7 +4,7 @@ import { supabase } from './supabaseClient';
 import { DbCourseCertificate } from './dbTypes';
 
 class CertificateService {
-  /** Official, Vormirix-issued certificates — NOT the same as the
+  /** Official, Vormirex-issued certificates — NOT the same as the
    * rule-based `achievements` badges (see achievementService.ts). These are
    * only ever created by issue_course_certificate() when a course with
    * certificate_available is actually completed (009/016 migrations);

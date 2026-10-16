@@ -10,12 +10,12 @@ import { PublicCoursesPreview } from './PublicCoursesPreview';
 import { PublicFinalCTA } from './PublicFinalCTA';
 import { PublicHero } from './PublicHero';
 import { ShortVideoConcept } from './ShortVideoConcept';
-import { WhyVormirix } from './WhyVormirix';
+import { WhyVormirex } from './WhyVormirex';
 
 interface PublicLandingPageProps {
   courses: Course[];
   onStartLearning: () => void;
-  onExploreVormirix: () => void;
+  onExploreVormirex: () => void;
   onOpenTeacherSignup: () => void;
   onOpenAuthForCourse: (course: Course) => void;
   onSelectPricingPlan: (plan: PricingPlan, billingCycle: 'monthly' | 'yearly') => void;
@@ -24,7 +24,7 @@ interface PublicLandingPageProps {
 export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
   courses,
   onStartLearning,
-  onExploreVormirix,
+  onExploreVormirex,
   onOpenTeacherSignup,
   onOpenAuthForCourse,
   onSelectPricingPlan,
@@ -34,15 +34,15 @@ export const PublicLandingPage: React.FC<PublicLandingPageProps> = ({
       {/* 1. Hero Section */}
       <PublicHero
         onStartLearning={onStartLearning}
-        onExploreVormirix={onExploreVormirix}
+        onExploreVormirex={onExploreVormirex}
         onOpenTeacherSignup={onOpenTeacherSignup}
       />
 
       {/* 2. Key Stats Bar */}
       <StatsSection />
 
-      {/* 3. Why Vormirix Section */}
-      <WhyVormirix />
+      {/* 3. Why Vormirex Section */}
+      <WhyVormirex />
 
       {/* 3b. Core Features (id="features" — linked from the Footer's
           Product > Features link, which previously pointed at nothing

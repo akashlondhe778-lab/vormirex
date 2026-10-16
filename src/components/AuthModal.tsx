@@ -15,7 +15,7 @@ import { DEMO_ACCOUNT_PASSWORD, DEMO_PERSONAS } from '../data/mockData';
 import { authService } from '../services/authService';
 import { UserProfile } from '../types';
 import { describeAuthError } from '../utils/authErrors';
-import { VormirixLogo } from './VormirixLogo';
+import { VormirexLogo } from './VormirexLogo';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -112,11 +112,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Modal Header */}
         <div className="flex items-center gap-3 mb-2">
           <div className="w-10 h-10 rounded-xl bg-[#111319] border border-[#3b4a47] flex items-center justify-center shadow-[0_0_15px_rgba(88,245,224,0.25)]">
-            <VormirixLogo size={24} variant="gradient" withGlow />
+            <VormirexLogo size={24} variant="gradient" withGlow />
           </div>
           <div>
             <h3 className="font-extrabold text-lg sm:text-xl text-white">
-              {mode === 'login' ? 'Log In to Vormirix' : 'Create Vormirix Account'}
+              {mode === 'login' ? 'Log In to Vormirex' : 'Create Vormirex Account'}
             </h3>
             <p className="text-xs text-[#bacac6]">
               {mode === 'login'
@@ -246,7 +246,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 required
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)}
-                placeholder="name@vormirix.edu"
+                placeholder="name@vormirex.edu"
                 className="w-full bg-[#111319] border border-[#3b4a47] focus:border-[#58f5e0] rounded-xl pl-9 pr-3 py-2 text-xs text-white focus:outline-none"
               />
             </div>

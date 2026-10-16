@@ -128,11 +128,11 @@ export default function App() {
   // account in dev mode when there's no real session, so `user` is
   // effectively always populated while developing. Re-add a redirect-to-
   // /login guard here when production authentication is turned on (see
-  // VORMIRIX_BACKEND_PLAN.md).
+  // VORMIREX_BACKEND_PLAN.md).
   //
   // The guard below is a DIFFERENT concern: once someone IS authenticated,
   // Student and Teacher are separate account types (see
-  // VORMIRIX_BACKEND_PLAN.md §13) and must not be able to wander into each
+  // VORMIREX_BACKEND_PLAN.md §13) and must not be able to wander into each
   // other's area via a typed-in URL. `/app/profile` is the one explicitly
   // shared page (both role menus link to it). This is a client-side UX
   // convenience only — the real enforcement is server-side: Supabase RLS
@@ -235,7 +235,7 @@ export default function App() {
 
   const handleLogout = async () => {
     await signOut();
-    showToast('Signed out of Vormirix.');
+    showToast('Signed out of Vormirex.');
     navigateTo('/');
   };
 
@@ -368,14 +368,14 @@ export default function App() {
     try {
       await profileService.updateProfile(user.id, { plan: planName });
       await refreshProfile();
-      showToast(`🚀 Welcome to Vormirix ${planName}! All premium AI tools unlocked.`);
+      showToast(`🚀 Welcome to Vormirex ${planName}! All premium AI tools unlocked.`);
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Upgrade failed. Please try again.');
     }
   };
 
   // ReelsFeed handlers — real like/save/comment/follow writes. Fixes the
-  // prop-contract mismatch flagged in VORMIRIX_BACKEND_PLAN.md (App.tsx
+  // prop-contract mismatch flagged in VORMIREX_BACKEND_PLAN.md (App.tsx
   // previously passed onGainXp/onOpenCourseDetail/onOpenDoubtSolver/
   // onOpenUpload props that ReelsFeed.tsx's actual interface never declared).
   const handleLikeVideo = async (videoId: string) => {
@@ -448,7 +448,7 @@ export default function App() {
       <div className="min-h-screen bg-[#111319] text-[#e1e2ea] flex items-center justify-center font-sans">
         <div className="flex items-center gap-2.5 text-xs font-bold text-[#bacac6]">
           <div className="w-4 h-4 border-2 border-[#58f5e0] border-t-transparent rounded-full animate-spin" />
-          <span>Loading Vormirix...</span>
+          <span>Loading Vormirex...</span>
         </div>
       </div>
     );
@@ -516,7 +516,7 @@ export default function App() {
                   setAuthRolePreset('student');
                   navigateTo('/signup');
                 }}
-                onExploreVormirix={() => {
+                onExploreVormirex={() => {
                   const elem = document.getElementById('how-it-works');
                   if (elem) elem.scrollIntoView({ behavior: 'smooth' });
                 }}

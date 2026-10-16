@@ -1,7 +1,7 @@
 import { BookOpen, CheckCircle2, Code2, Flame, GraduationCap, LineChart, Sparkles, Target, Zap } from 'lucide-react';
 import React from 'react';
 
-export const WhyVormirix: React.FC = () => {
+export const WhyVormirex: React.FC = () => {
   const pillars = [
     {
       icon: Sparkles,
@@ -36,7 +36,7 @@ export const WhyVormirix: React.FC = () => {
   ];
 
   return (
-    <section id="why-vormirix" className="py-20 md:py-28 px-4 sm:px-6 max-w-7xl mx-auto border-t border-[#272a30]">
+    <section id="why-vormirex" className="py-20 md:py-28 px-4 sm:px-6 max-w-7xl mx-auto border-t border-[#272a30]">
       <div className="text-center max-w-3xl mx-auto mb-16">
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#3b4a47] bg-[#191c21] mb-4">
           <span className="text-[11px] uppercase font-bold tracking-wider text-[#58f5e0]">
@@ -44,7 +44,7 @@ export const WhyVormirix: React.FC = () => {
           </span>
         </div>
         <h2 className="font-['Manrope'] text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-5">
-          Why Vormirix?
+          Why Vormirex?
         </h2>
         <p className="text-base sm:text-lg text-[#bacac6] leading-relaxed">
           Instead of endless entertainment, use your scrolling time to build real knowledge, master hard concepts, and level up your career.

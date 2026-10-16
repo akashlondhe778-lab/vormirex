@@ -1,11 +1,11 @@
-# Vormirix
+# Vormirex
 
 An EdTech platform: short-form educational video feed, course marketplace with
 paid/free masterclasses, XP/gamification, and separate student/teacher portals.
 
 Frontend: React 19 + TypeScript + Vite + Tailwind CSS 4.
 Backend: Supabase (PostgreSQL + Auth + Storage + Edge Functions). See
-[VORMIRIX_BACKEND_PLAN.md](./VORMIRIX_BACKEND_PLAN.md) for the full backend
+[VORMIREX_BACKEND_PLAN.md](./VORMIREX_BACKEND_PLAN.md) for the full backend
 architecture and design rationale.
 
 ## Setup

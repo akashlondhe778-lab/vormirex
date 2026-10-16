@@ -1,7 +1,7 @@
 -- 013_role_security.sql
 -- Closes two real authorization gaps found while separating Student and
 -- Teacher into fully independent account types (see
--- VORMIRIX_BACKEND_PLAN.md §13):
+-- VORMIREX_BACKEND_PLAN.md §13):
 --
 -- 1. profiles_update_own (010_rls.sql) let an authenticated user update ANY
 --    column on their own profiles row, including `role` — meaning a Student

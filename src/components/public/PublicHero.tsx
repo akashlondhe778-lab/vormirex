@@ -1,16 +1,16 @@
 import { ArrowRight, BookOpen, CheckCircle, Compass, Flame, Play, Sparkles, TrendingUp, Zap } from 'lucide-react';
 import React from 'react';
-import { VormirixLogo } from '../VormirixLogo';
+import { VormirexLogo } from '../VormirexLogo';
 
 interface PublicHeroProps {
   onStartLearning: () => void;
-  onExploreVormirix: () => void;
+  onExploreVormirex: () => void;
   onOpenTeacherSignup: () => void;
 }
 
 export const PublicHero: React.FC<PublicHeroProps> = ({
   onStartLearning,
-  onExploreVormirix,
+  onExploreVormirex,
   onOpenTeacherSignup,
 }) => {
   return (
@@ -53,12 +53,12 @@ export const PublicHero: React.FC<PublicHeroProps> = ({
         </button>
 
         <button
-          onClick={onExploreVormirix}
+          onClick={onExploreVormirex}
           className="w-full sm:w-auto text-xs uppercase tracking-wider font-bold bg-[#191c21] hover:bg-[#272a30] text-[#e1e2ea] border border-[#3b4a47] hover:border-[#58f5e0]/50 px-7 py-4 rounded-full hover:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
           id="hero-explore-btn"
         >
           <Compass className="w-4 h-4 text-[#58f5e0]" />
-          <span>Explore Vormirix</span>
+          <span>Explore Vormirex</span>
         </button>
       </div>
 
@@ -73,8 +73,8 @@ export const PublicHero: React.FC<PublicHeroProps> = ({
               <div className="w-3 h-3 rounded-full bg-[#2dd8c4]/80" />
             </div>
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#111319] border border-[#272a30]">
-              <VormirixLogo size={14} variant="gradient" />
-              <span className="text-[11px] font-mono text-[#bacac6]">vormirix.com/app/feed</span>
+              <VormirexLogo size={14} variant="gradient" />
+              <span className="text-[11px] font-mono text-[#bacac6]">vormirex.com/app/feed</span>
             </div>
           </div>
           <div className="flex items-center gap-2 text-xs font-semibold text-[#58f5e0] bg-[#58f5e0]/10 px-3 py-1 rounded-full border border-[#58f5e0]/20">

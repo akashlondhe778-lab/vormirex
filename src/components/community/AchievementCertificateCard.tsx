@@ -46,7 +46,7 @@ export const AchievementCertificateCard: React.FC<AchievementCertificateCardProp
       <div className="relative z-10 text-center space-y-4">
         <div className="flex items-center justify-center gap-2">
           <Award className="w-6 h-6 text-[#f59e0b]" />
-          <span className="text-xs uppercase font-black tracking-[0.2em] text-[#f59e0b]">Vormirix Achievement</span>
+          <span className="text-xs uppercase font-black tracking-[0.2em] text-[#f59e0b]">Vormirex Achievement</span>
         </div>
 
         <h2 className="text-xl sm:text-2xl font-extrabold text-white">{certificate.courseTitle}</h2>

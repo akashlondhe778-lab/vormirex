@@ -29,7 +29,7 @@ export const ShareAchievementModal: React.FC<ShareAchievementModalProps> = ({
   const selected = certificates.find((c) => c.id === selectedId);
 
   const defaultCaption = selected
-    ? `🎉 I completed ${selected.courseTitle}!\n\n🏆 Achievement earned from Vormirix\n\n#${selected.courseTitle.replace(/\s+/g, '')} #Vormirix #Learning #Achievement`
+    ? `🎉 I completed ${selected.courseTitle}!\n\n🏆 Achievement earned from Vormirex\n\n#${selected.courseTitle.replace(/\s+/g, '')} #Vormirex #Learning #Achievement`
     : '';
 
   const handleSubmit = async (e: React.FormEvent) => {

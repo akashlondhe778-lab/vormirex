@@ -45,7 +45,7 @@ export const HowItWorks: React.FC<HowItWorksProps> = ({ onStartLearning }) => {
           </span>
         </div>
         <h2 className="font-['Manrope'] text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-5">
-          How Vormirix Works
+          How Vormirex Works
         </h2>
         <p className="text-base sm:text-lg text-[#bacac6] leading-relaxed">
           Turning passive scrolling into an engaging, structured mastery pipeline in three seamless steps.

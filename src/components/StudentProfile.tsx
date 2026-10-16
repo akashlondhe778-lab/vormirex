@@ -113,7 +113,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
             </div>
             {user.username && <p className="text-xs text-[#58f5e0]">@{user.username}</p>}
             <p className="text-xs text-[#bacac6] max-w-xl">
-              {user.bio || 'Computer Science & Mathematics learner on Vormirix AI Arena.'}
+              {user.bio || 'Computer Science & Mathematics learner on Vormirex AI Arena.'}
             </p>
             <p className="text-[11px] text-[#bacac6]/70">{user.email}</p>
           </div>
@@ -335,7 +335,7 @@ export const StudentProfile: React.FC<StudentProfileProps> = ({
           <div className="p-6 bg-[#111319] rounded-2xl border border-[#272a30] text-center space-y-2">
             <GraduationCap className="w-8 h-8 text-[#3b4a47] mx-auto" />
             <p className="text-xs text-[#bacac6]">
-              Complete all lessons in any enrolled course to receive a verified Vormirix Certificate.
+              Complete all lessons in any enrolled course to receive a verified Vormirex Certificate.
             </p>
           </div>
         ) : (

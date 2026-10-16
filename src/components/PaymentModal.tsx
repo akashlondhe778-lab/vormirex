@@ -97,7 +97,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
             <div className="flex items-center gap-2 mb-1">
               <ShieldCheck className="w-5 h-5 text-[#58f5e0]" />
               <span className="text-xs uppercase font-bold tracking-wider text-[#58f5e0]">
-                Vormirix Secure Payment
+                Vormirex Secure Payment
               </span>
             </div>
             <h2 className="text-xl font-bold text-white mb-2">Checkout & Course Enrollment</h2>

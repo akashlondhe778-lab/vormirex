@@ -9,7 +9,7 @@ export interface PaymentVerificationResult {
 }
 
 /**
- * Rewritten to be server-authoritative (see VORMIRIX_BACKEND_PLAN.md §8/§14).
+ * Rewritten to be server-authoritative (see VORMIREX_BACKEND_PLAN.md §8/§14).
  * The old implementation faked an entire gateway client-side and trusted its
  * own "success" flag — that flag never touched a database write. Now:
  *

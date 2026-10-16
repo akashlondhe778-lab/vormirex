@@ -1,6 +1,6 @@
 -- 015_social_community.sql
 -- Phase 1 of the Student Social Learning & Community system (see
--- VORMIRIX_BACKEND_PLAN.md §14): public student profiles, follow/unfollow
+-- VORMIREX_BACKEND_PLAN.md §14): public student profiles, follow/unfollow
 -- (reuses the existing `follows` table from 006_short_videos_and_social.sql
 -- — it was already generic student<->teacher follow, not video-specific),
 -- posts (text/image), and a Q&A "Ask & Solve" system with accepted answers.

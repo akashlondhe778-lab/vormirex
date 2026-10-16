@@ -70,7 +70,7 @@ export function mapCourse(row: DbCourse): Course {
     category: row.category,
     difficulty: row.difficulty,
     teacherId: row.teacher_id,
-    teacherName: row.teacher?.full_name || 'Vormirix Educator',
+    teacherName: row.teacher?.full_name || 'Vormirex Educator',
     teacherAvatar: row.teacher?.avatar_url || '',
     teacherRole: row.teacher?.role === 'teacher' ? 'Verified Educator' : '',
     teacherBio: row.teacher?.bio || '',
@@ -94,7 +94,7 @@ export function mapVideoComment(row: DbVideoComment): VideoComment {
   return {
     id: row.id,
     userId: row.user_id,
-    userName: row.user?.full_name || 'Vormirix Learner',
+    userName: row.user?.full_name || 'Vormirex Learner',
     userAvatar: row.user?.avatar_url || '',
     text: row.comment,
     timestamp: row.created_at,
@@ -115,7 +115,7 @@ export function mapShortVideo(row: DbShortVideo, opts?: { isLiked?: boolean; isS
     tags: row.tags,
     difficulty: row.difficulty,
     teacherId: row.creator_id,
-    teacherName: row.creator?.full_name || 'Vormirix Creator',
+    teacherName: row.creator?.full_name || 'Vormirex Creator',
     teacherAvatar: row.creator?.avatar_url || '',
     teacherRole: row.creator?.role === 'teacher' ? 'Course Instructor' : 'Student Creator',
     likesCount: row.likes_count,
@@ -199,7 +199,7 @@ export function composeUserProfile(
     plan: profile.plan,
     // completedQuests/solvedDoubts back the AI Tutor / adaptive quiz mock
     // features, which are out of scope for this backend integration (see
-    // VORMIRIX_BACKEND_PLAN.md §1) — defaulted rather than fabricated.
+    // VORMIREX_BACKEND_PLAN.md §1) — defaulted rather than fabricated.
     completedQuests: 0,
     solvedDoubts: 0,
     enrolledCourseIds,
@@ -248,7 +248,7 @@ export function mapCommunityPost(row: DbPost, opts?: { isLiked?: boolean; isSave
   return {
     id: row.id,
     authorId: row.author_id,
-    authorName: row.author?.full_name || 'Vormirix Student',
+    authorName: row.author?.full_name || 'Vormirex Student',
     authorAvatar: row.author?.avatar_url || '',
     authorUsername: row.author?.username ?? null,
     type: row.type,
@@ -282,7 +282,7 @@ export function mapProject(row: DbProject): StudentProject {
   return {
     id: row.id,
     authorId: row.author_id,
-    authorName: row.author?.full_name || 'Vormirix Student',
+    authorName: row.author?.full_name || 'Vormirex Student',
     authorAvatar: row.author?.avatar_url || '',
     title: row.title,
     description: row.description || undefined,
@@ -300,7 +300,7 @@ export function mapPostComment(row: DbPostComment): PostComment {
     id: row.id,
     postId: row.post_id,
     userId: row.user_id,
-    userName: row.user?.full_name || 'Vormirix Student',
+    userName: row.user?.full_name || 'Vormirex Student',
     userAvatar: row.user?.avatar_url || '',
     comment: row.comment,
     parentCommentId: row.parent_comment_id || undefined,
@@ -312,7 +312,7 @@ export function mapQuestion(row: DbQuestion): Question {
   return {
     id: row.id,
     authorId: row.author_id,
-    authorName: row.author?.full_name || 'Vormirix Student',
+    authorName: row.author?.full_name || 'Vormirex Student',
     authorAvatar: row.author?.avatar_url || '',
     title: row.title,
     description: row.description || undefined,
@@ -334,7 +334,7 @@ export function mapAnswer(row: DbAnswer, isUpvotedByMe = false): QuestionAnswer 
     id: row.id,
     questionId: row.question_id,
     authorId: row.author_id,
-    authorName: row.author?.full_name || 'Vormirix Student',
+    authorName: row.author?.full_name || 'Vormirex Student',
     authorAvatar: row.author?.avatar_url || '',
     content: row.content,
     upvotesCount: row.upvotes_count,

@@ -1,6 +1,6 @@
 import { Globe, MessageSquare, Shield, Sparkles } from 'lucide-react';
 import React from 'react';
-import { VormirixLogo } from './VormirixLogo';
+import { VormirexLogo } from './VormirexLogo';
 
 interface FooterProps {
   onOpenPrivacy?: () => void;
@@ -15,12 +15,12 @@ export const Footer: React.FC<FooterProps> = ({ onOpenPrivacy, onOpenTerms }) =>
         <div className="flex flex-col gap-4 md:col-span-1">
           <a href="#" className="font-['Manrope'] text-2xl font-bold text-white flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-[#191c21] border border-[#3b4a47] flex items-center justify-center shadow-[0_0_15px_rgba(88,245,224,0.2)]">
-              <VormirixLogo size={22} variant="gradient" withGlow />
+              <VormirexLogo size={22} variant="gradient" withGlow />
             </div>
-            <span>Vormirix</span>
+            <span>Vormirex</span>
           </a>
           <p className="text-[14px] text-[#bacac6] leading-relaxed opacity-85">
-            © 2026 Vormirix Inc. Turn Your Scroll Into Learning.
+            © 2026 Vormirex Inc. Turn Your Scroll Into Learning.
           </p>
           <div className="flex gap-4 mt-2">
             <a

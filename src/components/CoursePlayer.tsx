@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { Course, Lesson, UserProfile } from '../types';
-import { VormirixLogo } from './VormirixLogo';
+import { VormirexLogo } from './VormirexLogo';
 
 interface CoursePlayerProps {
   course: Course;
@@ -104,7 +104,7 @@ export const CoursePlayer: React.FC<CoursePlayerProps> = ({
           </button>
           <div className="h-4 w-[1px] bg-[#272a30]" />
           <div className="flex items-center gap-2 min-w-0">
-            <VormirixLogo size={18} variant="gradient" />
+            <VormirexLogo size={18} variant="gradient" />
             <h2 className="text-xs sm:text-sm font-bold text-white truncate">
               {course.title}
             </h2>
@@ -294,7 +294,7 @@ export const CoursePlayer: React.FC<CoursePlayerProps> = ({
                   Have a question about this lesson?
                 </h4>
                 <p className="text-xs text-[#bacac6]">
-                  Ask Vormirix AI Tutor or post for your classmates.
+                  Ask Vormirex AI Tutor or post for your classmates.
                 </p>
                 <button
                   onClick={() => onOpenDoubtTutor(`Please explain the concept in "${activeLesson.title}" with a step-by-step example.`)}

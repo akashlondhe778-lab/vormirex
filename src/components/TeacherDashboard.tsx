@@ -81,7 +81,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   }, [activeRoute]);
 
   // teacherId now comes straight from courses.teacher_id / short_videos.creator_id
-  // (real Supabase Auth UUIDs — see VORMIRIX_BACKEND_PLAN.md). The old
+  // (real Supabase Auth UUIDs — see VORMIREX_BACKEND_PLAN.md). The old
   // fallback here (`user.id === 'teacher-1' || c.teacherName === user.name`)
   // was a demo-persona workaround that would have shown courses belonging to
   // a different teacher who happened to share a display name.

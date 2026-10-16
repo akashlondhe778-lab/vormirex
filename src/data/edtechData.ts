@@ -514,7 +514,7 @@ export const MOCK_ACHIEVEMENTS: Achievement[] = [
   {
     id: 'ach-4',
     title: 'Century Scholar',
-    description: 'Accumulate 1,000+ total XP in Vormirix Arena',
+    description: 'Accumulate 1,000+ total XP in Vormirex Arena',
     icon: 'Zap',
     category: 'xp',
     unlocked: true,

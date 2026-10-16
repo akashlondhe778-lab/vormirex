@@ -33,7 +33,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, type })
           {type === 'privacy' ? (
             <>
               <p>
-                <strong>1. Data Collection:</strong> Vormirix adheres strictly to global student data privacy
+                <strong>1. Data Collection:</strong> Vormirex adheres strictly to global student data privacy
                 standards (including FERPA, COPPA, and GDPR principles). We only store your study progress,
                 XP badges, and quest history.
               </p>
@@ -49,7 +49,7 @@ export const LegalModal: React.FC<LegalModalProps> = ({ isOpen, onClose, type })
           ) : (
             <>
               <p>
-                <strong>1. Educational Purpose:</strong> Vormirix is designed to supplement and accelerate
+                <strong>1. Educational Purpose:</strong> Vormirex is designed to supplement and accelerate
                 human learning through guided discovery, Socratic dialogue, and interactive feedback.
               </p>
               <p>

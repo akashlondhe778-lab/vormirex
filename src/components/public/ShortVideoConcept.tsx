@@ -18,7 +18,7 @@ export const ShortVideoConcept: React.FC<ShortVideoConceptProps> = ({ onStartLea
           Short Video → Full Course → Real Learning
         </h2>
         <p className="text-base sm:text-lg text-[#bacac6] leading-relaxed">
-          How Vormirix bridges the gap between quick micro-content and structured deep mastery.
+          How Vormirex bridges the gap between quick micro-content and structured deep mastery.
         </p>
       </div>
 
@@ -36,7 +36,7 @@ export const ShortVideoConcept: React.FC<ShortVideoConceptProps> = ({ onStartLea
             </h3>
 
             <p className="text-sm sm:text-base text-[#bacac6] leading-relaxed">
-              On traditional social platforms, short videos leave you hanging with no structured path. On Vormirix, every educational short video is linked to an extensive, structured course by the same verified creator.
+              On traditional social platforms, short videos leave you hanging with no structured path. On Vormirex, every educational short video is linked to an extensive, structured course by the same verified creator.
             </p>
 
             {/* Example Walkthrough Box */}
